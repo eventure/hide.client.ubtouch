@@ -6,6 +6,7 @@
 HideMe::HideMe(int& argc, char** argv)
     : QApplication(argc, argv)
     , m_view(nullptr)
+    , m_isLogined(false)
 {
     setOrganizationName("Hideme");
     setOrganizationDomain("hide.com");
