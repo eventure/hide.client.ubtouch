@@ -12,10 +12,6 @@ RoundedRectangle{
     property alias echoMode: passwordTextField.echoMode
     property alias text: passwordTextField.text
 
-    anchors{
-        top: usernameWrapper.bottom
-    }
-
     TextInput {
         id: passwordTextField
         width: parent.width
@@ -29,12 +25,12 @@ RoundedRectangle{
 
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize:  bigButton.width/20
+        font.pixelSize: passwordTextField.height*0.8
     }
 
     Text {
         id: placeholderText
-        visible: !passwordTextField.focus
+        visible: !passwordTextField.focus && passwordTextField.text.length  == 0
 
         anchors{
             top: parent.top

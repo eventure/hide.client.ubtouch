@@ -14,10 +14,25 @@ MainView {
     PageStack {
         id: mainStack
         Component.onCompleted: {
-            if(mApplication.isLogined) {
-                console.log("LOGINED")
+            if(!haveTools) {
+                push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
             } else {
-                push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
+                if(mApplication.isLogined) {
+                    push(Qt.resolvedUrl("pages/ConnectPage.qml"))
+                } else {
+                    push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
+                }
+            }
+        }
+    }
+
+    Connections{
+        target: mApplication
+        onIsLoginedChanged: {
+            if(mApplication.isLogined) {
+                mainStack.push(Qt.resolvedUrl("pages/ConnectPage.qml"))
+            } else {
+                mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
             }
         }
     }

@@ -36,7 +36,7 @@ Page {
                 height: loginButton.height*2
 
                 LoginPassField{
-                    id: usernameWrapper
+                    id: usernameField
                     width: parent.width
                     height: loginButton.height
                     cornerSide: RoundedRectangle.Direction.Up
@@ -55,12 +55,21 @@ Page {
                     borderWidth: 1
                     borderColor: "#DDDDDD"
                     placeholderText: i18n.tr("Password")
+                    echoMode: TextInput.Password
+
+                    anchors{
+                        top: usernameField.bottom
+                    }
                 }
             }
+
             BigButton{
                 id: loginButton
                 width: parent.width
                 text: qsTr("Login")
+                onClicked: {
+                    mApplication.tryLogin(usernameField.text, passwordField.text)
+                }
             }
         }
     }

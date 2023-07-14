@@ -3,7 +3,6 @@ import QtQuick 2.15
 Rectangle {
     id: bigButton
 
-
     property bool inverted: false
     property alias text: textButton.text
     signal clicked();
@@ -26,6 +25,8 @@ Rectangle {
 
     MouseArea{
         anchors.fill: parent
-        onClicked: bigButton.clicked()
+        onClicked: {
+            bigButton.clicked()
+        }
     }
 }
