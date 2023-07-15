@@ -9,9 +9,31 @@ MainView {
     applicationName: "hide.client.ubtouch"
 
     backgroundColor: "white"
+    theme.name: "Lomiri.Components.Themes.Suru"
 
-    Label {
-        anchors.centerIn: parent
-        text: "Hello Hide.ME"
+    PageStack {
+        id: mainStack
+        Component.onCompleted: {
+            if(!haveTools) {
+                push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
+            } else {
+                if(mApplication.isLogined) {
+                    push(Qt.resolvedUrl("pages/ConnectPage.qml"))
+                } else {
+                    push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
+                }
+            }
+        }
+    }
+
+    Connections{
+        target: mApplication
+        onIsLoginedChanged: {
+            if(mApplication.isLogined) {
+                mainStack.push(Qt.resolvedUrl("pages/ConnectPage.qml"))
+            } else {
+                mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
+            }
+        }
     }
 }

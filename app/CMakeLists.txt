@@ -7,6 +7,8 @@ include_directories(
     ${sdkhelper_SOURCE_DIR})
 
 set(SRC
+    clitoolconnector.cpp
+    clitoolconnector.h
     main.cpp
     hideme.cpp
     hideme.h)
