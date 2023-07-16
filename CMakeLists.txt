@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(hide.client.ubtouch VERSION 0.1 LANGUAGES CXX)
+project(hideme VERSION 0.1 LANGUAGES CXX)
 include(FindGettext)
 if(NOT GETTEXT_FOUND)
     message(FATAL_ERROR "Could not find gettext")
@@ -8,15 +8,38 @@ endif(NOT GETTEXT_FOUND)
 # Standard install paths
 include(GNUInstallDirs)
 
+option(CLICK_MODE "Installs to a contained location" on)
+
+set(CLICK_NAME hideme.ubports)
 set(APP_NAME hideme)
 set(DESKTOP_FILE "${PROJECT_NAME}.desktop")
-set(APP_HARDCODE hide.client.ubtouch)
 set(ICON_FILE app/graphics/hideme-app.svg)
 set(SPLASH_FILE app/graphics/hideme-app-splash.svg)
 
-set(DATA_DIR ${CMAKE_INSTALL_DATADIR}/${APP_HARDCODE})
-set(EXEC ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/${APP_HARDCODE})
-set(ICON ${CMAKE_INSTALL_PREFIX}/${DATA_DIR}/${ICON_FILE})
+if(CLICK_MODE)
+    set(CMAKE_INSTALL_PREFIX /)
+    set(CMAKE_INSTALL_BINDIR /)
+    set(CMAKE_INSTALL_DATADIR /)
+    set(DATA_DIR /)
+    set(CMAKE_INSTALL_FULL_DATADIR /)
+    set(ICON hideme-app.svg)
+    set(SPLASH ${SPLASH_FILE})
+    set(EXEC "hideme")
+    set(DESKTOP_DIR ${DATA_DIR})
+    set(URLS_DIR ${DATA_DIR})
+
+    add_compile_definitions(WITH_CLICK)
+
+    configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/manifest.json ${APP_NAME}.apparmor DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE} DESTINATION ${DESKTOP_DIR})
+    install(FILES ${SRC_FILES} app/graphics/hideme-app.svg DESTINATION DESTINATION /)
+
+else(CLICK_MODE)
+    set(DATA_DIR ${CMAKE_INSTALL_DATADIR}/${APP_NAME})
+    set(EXEC ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/${APP_NAME})
+    set(ICON ${CMAKE_INSTALL_PREFIX}/${DATA_DIR}/${ICON_FILE})
+endif(CLICK_MODE)
 
 file(GLOB SRC_FILES
      RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -33,20 +56,17 @@ add_custom_target(${DESKTOP_FILE} ALL
 )
 
 find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick REQUIRED)
-set(APP_DIR ${CMAKE_INSTALL_FULL_DATADIR}/hide.client.ubtouch)
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
 add_subdirectory(app)
 add_subdirectory(po)
-
-# make the qml files visible on qtcreator
-file(GLOB QML_JS_FILES
-     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-     *.qml *.js README* *.url-dispatcher *.txt)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
-install(FILES ${SRC_FILES} ${ICON_FILE} DESTINATION ${DATA_DIR})
-install(DIRECTORY app/graphics DESTINATION ${DATA_DIR}/graphics)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CA.pem
-        DESTINATION ${APP_DIR}/)
+if(CLICK_MODE)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}  DESTINATION /)
+    install(DIRECTORY app/graphics DESTINATION DESTINATION /)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CA.pem  DESTINATION /)
+else(CLICK_MODE)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}  DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+    install(FILES ${SRC_FILES} ${ICON_FILE} DESTINATION DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
+    install(DIRECTORY app/graphics DESTINATION DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CA.pem  DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
+endif(CLICK_MODE)

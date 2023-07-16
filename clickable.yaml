@@ -1,0 +1,6 @@
+clickable_minimum_required: '7.5.0'
+builder: cmake
+framework: ubuntu-sdk-20.04
+dependencies_host:
+- cmake-extras
+ignore_review_errors: true

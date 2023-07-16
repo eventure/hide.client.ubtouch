@@ -20,4 +20,4 @@ CMakeFiles/
 build/
 debian/debhelper-build-stamp
 obj-*/
-
+.clickable

@@ -13,10 +13,8 @@ inline bool isRunningInstalled()
 
 inline QString appDirectory()
 {
-    static const QByteArray SNAP_PATH("SNAP");
-
-    if (qEnvironmentVariableIsSet(SNAP_PATH)) {
-        return QString("%1/@APP_DIR@").arg(QString(qgetenv(SNAP_PATH)));
+    if (QCoreApplication::applicationDirPath().startsWith("/opt/click")) {
+        return QString("%1/ui/").arg(QString(QCoreApplication::applicationDirPath()));
     } else if (isRunningInstalled()) {
         return QString("@APP_DIR@/ui");
     } else {
