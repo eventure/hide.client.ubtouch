@@ -9,6 +9,7 @@ endif(NOT GETTEXT_FOUND)
 include(GNUInstallDirs)
 
 option(CLICK_MODE "Installs to a contained location" on)
+option(BUILD_CLI "Installs to a contained location" on)
 
 set(CLICK_NAME hideme.ubports)
 set(APP_NAME hideme)
@@ -60,10 +61,16 @@ configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
 add_subdirectory(app)
 add_subdirectory(po)
+
+if(BUILD_CLI)
+    add_subdirectory(tools)
+endif(BUILD_CLI)
+
 if(CLICK_MODE)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}  DESTINATION /)
     install(DIRECTORY app/graphics DESTINATION DESTINATION /)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CA.pem  DESTINATION /)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tools/cli/hide.me  DESTINATION /)
 else(CLICK_MODE)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}  DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES ${SRC_FILES} ${ICON_FILE} DESTINATION DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
