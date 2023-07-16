@@ -5,71 +5,66 @@ import "../components"
 
 Page {
     id: loginPage
+    anchors.fill: parent
 
     header: PageHeader {
         title: "hide.me VPN"
     }
 
-    Flickable {
-        id: loginPageFlickable
+
+    Column {
+        id: loginPageColumn
+        width: parent.width - units.gu(8)
+        spacing: units.gu(4)
+
         clip: true
-        flickableDirection: Flickable.AutoFlickIfNeeded
+
         anchors {
-            topMargin: loginPage.header.height + units.gu(1)
-            fill: parent
+            top: parent.top
+            topMargin: units.gu(20)
+            left: parent.left
+            leftMargin: units.gu(4)
         }
-        contentHeight: loginPageColumn.childrenRect.height
 
-        Column {
-            id: loginPageColumn
-            width: parent.width - units.gu(2)
-            spacing: units.gu(3)
-            anchors {
-                top: parent.top
-                topMargin: units.gu(5)
-                left: parent.left
-                leftMargin: units.gu(1)
-            }
-            Item {
-                id: loginGroup
+        Item {
+            id: loginGroup
+            width: parent.width
+            height: loginButton.height*2
+
+            LoginPassField{
+                id: usernameField
                 width: parent.width
-                height: loginButton.height*2
-
-                LoginPassField{
-                    id: usernameField
-                    width: parent.width
-                    height: loginButton.height
-                    cornerSide: RoundedRectangle.Direction.Up
-                    color: "white"
-                    borderWidth: 1
-                    borderColor: "#DDDDDD"
-                    placeholderText: i18n.tr("Username")
-                }
-
-                LoginPassField{
-                    id: passwordField
-                    width: parent.width
-                    height: loginButton.height
-                    cornerSide: RoundedRectangle.Direction.Down
-                    color: "white"
-                    borderWidth: 1
-                    borderColor: "#DDDDDD"
-                    placeholderText: i18n.tr("Password")
-                    echoMode: TextInput.Password
-
-                    anchors{
-                        top: usernameField.bottom
-                    }
-                }
+                height: loginButton.height
+                cornerSide: RoundedRectangle.Direction.Up
+                color: "white"
+                borderWidth: 1
+                borderColor: "#DDDDDD"
+                placeholderText: i18n.tr("Username")
             }
 
-            BigButton{
-                id: loginButton
+            LoginPassField{
+                id: passwordField
                 width: parent.width
-                text: qsTr("Login")
-                onClicked: {
-                    mApplication.tryLogin(usernameField.text, passwordField.text)
+                height: loginButton.height
+                cornerSide: RoundedRectangle.Direction.Down
+                color: "white"
+                borderWidth: 1
+                borderColor: "#DDDDDD"
+                placeholderText: i18n.tr("Password")
+                echoMode: TextInput.Password
+
+                anchors{
+                    top: usernameField.bottom
                 }
+            }
+        }
+
+        BigButton{
+            id: loginButton
+            width: parent.width
+            text: qsTr("Login")
+            onClicked: {
+                mApplication.tryLogin(usernameField.text, passwordField.text)
             }
         }
     }

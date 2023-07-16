@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QSettings>
 
 class CliToolConnector : public QObject
 {
@@ -27,6 +28,8 @@ private:
     QString m_program;
     QStringList m_baseArgumets;
     QString m_accessTokenFile;
+
+    QSettings* m_settings;
 };
 
 #endif // CLITOOLCONNECTOR_H

@@ -19,13 +19,14 @@ Rectangle {
         anchors.fill: parent
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize:  bigButton.width/20
+        font.pixelSize:  bigButton.height/3
         color: inverted ? "#2AA9E0" : "#FFFFFF"
     }
 
     MouseArea{
         anchors.fill: parent
         onClicked: {
+            console.log("CLICK!")
             bigButton.clicked()
         }
     }

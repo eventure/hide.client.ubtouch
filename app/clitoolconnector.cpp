@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QProcess>
 #include <QDebug>
-#include <QSettings>
 #include <QStandardPaths>
 #include <QDir>
 #include <QCoreApplication>
@@ -16,13 +15,14 @@ CliToolConnector::CliToolConnector(QObject *parent)
     , m_program("/usr/bin/hide.me")
 #endif
 {
+    m_settings = new QSettings("hideconfig.ini");
     QFile cli(m_program);
     m_cliAvailable = cli.exists();
     m_cli = new QProcess(this);
 
     connect(m_cli, &QProcess::readyReadStandardOutput, this, &CliToolConnector::getTokenHandler);
 #ifdef WITH_CLICK
-    m_baseArgumets << "-ca" << "/CA.pem";
+    m_baseArgumets << "-ca" << QCoreApplication::applicationDirPath() + "/CA.pem";
 #else
     m_baseArgumets << "-ca" << "/usr/share/hideme/CA.pem";
 #endif
@@ -32,6 +32,8 @@ CliToolConnector::CliToolConnector(QObject *parent)
     }
 
     m_accessTokenFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/accessToken.txt";
+
+    qDebug() << m_accessTokenFile;
 }
 
 bool CliToolConnector::cliAvailable() const
@@ -42,15 +44,16 @@ bool CliToolConnector::cliAvailable() const
 void CliToolConnector::getToken()
 {
     if(!m_cliAvailable) {
+        qCritical() << "CLI not avaiable" << m_program;
         return;
     }
 
-    QSettings settings;
-    QString user = settings.value("user").toString();
-    QString pass = settings.value("pass").toString();
-    QString server = settings.value("server", "de.hideservers.net").toString();
+    QString user = m_settings->value("user").toString();
+    QString pass = m_settings->value("pass").toString();
+    QString server = m_settings->value("server", "de.hideservers.net").toString();
 
     if(user.isEmpty() || pass.isEmpty()) {
+        qWarning() << "Settings is empty";
         return;
     }
 

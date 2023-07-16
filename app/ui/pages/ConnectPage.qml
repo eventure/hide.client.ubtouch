@@ -15,14 +15,14 @@ Item {
         id: statusImage
         width: parent.width/2
         height: width
-        source: mApplication.connected ?  "/usr/share/hide.client.ubtouch/graphics/graphics/vpn_on.png" : "/usr/share/hide.client.ubtouch/graphics/graphics/vpn_off.png"
+        source: mApplication.connected ?  "../graphics/vpn_on.png" : "../graphics/vpn_off.png"
         fillMode: Image.PreserveAspectFit
         anchors.centerIn: parent
     }
 
     BigButton{
         id: connectButton
-        text: mApplication.connected ? i18n.tr("Dissconect") : i18n.tr("Connect")
+        text: mApplication.connected ? i18n.tr("Disconect") : i18n.tr("Connect")
         border.color: "#ffffff"
 
         width: parent.width - units.gu(6)
