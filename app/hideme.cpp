@@ -41,7 +41,6 @@ bool HideMe::setup()
 
     m_view->rootContext()->setContextProperty("mApplication", this);
     m_view->rootContext()->setContextProperty("haveTools", m_cliConnector->cliAvailable());
-
     QUrl source(appDirectory() + "/hide.client.ubtouch.qml");
     m_view->setSource(source);
     m_view->show();

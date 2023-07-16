@@ -6,11 +6,12 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QDir>
+#include <QCoreApplication>
 
 CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
 #ifdef WITH_CLICK
-    , m_program("/hide.me")
+    , m_program(QCoreApplication::applicationDirPath()+"/hide.me")
 #else
     , m_program("/usr/bin/hide.me")
 #endif
