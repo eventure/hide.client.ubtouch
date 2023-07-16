@@ -13,17 +13,18 @@ set(SRC
     hideme.cpp
     hideme.h)
 
-add_executable(hide.client.ubtouch ${SRC})
+add_executable(hideme ${SRC})
 
-target_link_libraries(hide.client.ubtouch
+target_link_libraries(hideme
     Qt5::Core
     Qt5::Widgets
     Qt5::Qml
     Qt5::Quick
     Qt5::Gui)
 
-install(TARGETS hide.client.ubtouch
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-install(DIRECTORY ui
-    DESTINATION ${DATA_DIR})
+install(TARGETS hideme RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if(CLICK_MODE)
+    install(DIRECTORY ui DESTINATION /)
+else()
+install(DIRECTORY ui DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
+endif()

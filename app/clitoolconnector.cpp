@@ -9,15 +9,22 @@
 
 CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
+#ifdef WITH_CLICK
+    , m_program("/hide.me")
+#else
     , m_program("/usr/bin/hide.me")
+#endif
 {
     QFile cli(m_program);
     m_cliAvailable = cli.exists();
     m_cli = new QProcess(this);
 
     connect(m_cli, &QProcess::readyReadStandardOutput, this, &CliToolConnector::getTokenHandler);
-    m_baseArgumets << "-ca" << "/usr/share/hide.client.ubtouch/CA.pem";
-
+#ifdef WITH_CLICK
+    m_baseArgumets << "-ca" << "/CA.pem";
+#else
+    m_baseArgumets << "-ca" << "/usr/share/hideme/CA.pem";
+#endif
     QDir dataLocation(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     if(!dataLocation.exists()) {
         dataLocation.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
