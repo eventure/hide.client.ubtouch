@@ -38,5 +38,8 @@ MainView {
                 mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
             }
         }
+        onLoginFailed: {
+            PopupUtils.open(Qt.resolvedUrl("dialogs/LoginFailedDialog.qml"), mainView)
+        }
     }
 }

@@ -18,7 +18,7 @@ HideMe::HideMe(int& argc, char** argv)
 
     m_settings = new QSettings("hideconfig.ini");
 
-    m_isLogined = ( !m_settings->value("user").toString().isEmpty() && !m_settings->value("password").toString().isEmpty());
+    m_isLogined = (!m_settings->value("user").toString().isEmpty() && !m_settings->value("password").toString().isEmpty());
 
     connect(m_cliConnector, &CliToolConnector::loginFailed, this, &HideMe::onLoginFailed);
     connect(m_cliConnector, &CliToolConnector::loginSuccess, this, &HideMe::onLoginSucces);
@@ -59,11 +59,7 @@ void HideMe::tryLogin(QString user, QString pass)
         qCritical() << "Can't write into settings" << m_settings->fileName();
     }
 
-    m_settings->setValue("user", user);
-    m_settings->setValue("password", pass);
-    m_settings->sync();
-
-    m_cliConnector->getToken();
+    m_cliConnector->getToken(user, pass);
 }
 
 void HideMe::logout()
@@ -83,6 +79,8 @@ void HideMe::onLoginFailed()
     m_settings->setValue("user", "");
     m_settings->setValue("password", "");
     m_settings->sync();
+
+    emit loginFailed();
 }
 
 void HideMe::onLoginSucces()

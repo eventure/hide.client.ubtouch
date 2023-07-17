@@ -41,19 +41,19 @@ bool CliToolConnector::cliAvailable() const
     return m_cliAvailable;
 }
 
-void CliToolConnector::getToken()
+void CliToolConnector::getToken(QString user, QString password)
 {
     if(!m_cliAvailable) {
         qCritical() << "CLI not avaiable" << m_program;
         return;
     }
+    m_userName = user;
+    m_password = password;
 
-    QString user = m_settings->value("user").toString();
-    QString pass = m_settings->value("pass").toString();
     QString server = m_settings->value("server", "de.hideservers.net").toString();
 
-    if(user.isEmpty() || pass.isEmpty()) {
-        qWarning() << "Settings is empty";
+    if(m_userName.isEmpty() || m_password.isEmpty()) {
+        qCritical() << "user or password is empty";
         return;
     }
 
@@ -62,7 +62,7 @@ void CliToolConnector::getToken()
     m_cli->setProcessEnvironment(env);
 
     QStringList arguments;
-    arguments << m_baseArgumets << "-u" << user << "-P" << pass << "token" << server << "-f" << m_accessTokenFile ;
+    arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password << "token" << server << "-f" << m_accessTokenFile ;
     m_cli->start(m_program, arguments);
 }
 
@@ -83,6 +83,10 @@ void CliToolConnector::getTokenHandler()
         if(localAccessToken.exists()) {
             localAccessToken.copy(m_accessTokenFile);
             localAccessToken.remove();
+
+            m_settings->setValue("user", m_userName);
+            m_settings->setValue("password", m_password);
+            m_settings->sync();
         }
         emit loginSuccess();
     } else {

@@ -27,6 +27,8 @@ signals:
     void isLoginedChanged();
     void connectedChanged();
 
+    void loginFailed();
+
 private slots:
     void onLoginFailed();
     void onLoginSucces();

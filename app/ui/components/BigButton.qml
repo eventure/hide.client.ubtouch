@@ -26,7 +26,6 @@ Rectangle {
     MouseArea{
         anchors.fill: parent
         onClicked: {
-            console.log("CLICK!")
             bigButton.clicked()
         }
     }
