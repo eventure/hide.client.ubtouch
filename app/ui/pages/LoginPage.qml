@@ -81,9 +81,15 @@ Page {
     Connections{
         target: mApplication
         onLoginFailed: {
+            console.log("FAIL!")
+            timoutTimer.stop();
             loading.running = false
             usernameField.text = ""
             passwordField.text = ""
+        }
+        onLoginSuccess: {
+            console.log("SUCC!")
+            timoutTimer.stop();
         }
     }
 

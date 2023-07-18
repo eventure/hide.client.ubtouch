@@ -10,11 +10,16 @@
 CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
 #ifdef WITH_CLICK
-    , m_program(QCoreApplication::applicationDirPath()+"/hide.me")
+    #if defined(__aarch64__) || defined(_M_ARM64)
+    , m_program(QCoreApplication::applicationDirPath()+"/lib/aarch64-linux-gnu/bin/hide.me")
+    #elif defined(__x86_64__) || defined(_M_X64)
+    , m_program(QCoreApplication::applicationDirPath()+"/lib/x86_64-linux-gnu/bin/hide.me")
+    #endif
 #else
     , m_program("/usr/bin/hide.me")
 #endif
 {
+    qDebug() << m_program;
     m_settings = new QSettings("hideconfig.ini");
     QFile cli(m_program);
     m_cliAvailable = cli.exists();
@@ -63,7 +68,40 @@ void CliToolConnector::getToken(QString user, QString password)
 
     QStringList arguments;
     arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password << "token" << server << "-f" << m_accessTokenFile ;
-    m_cli->start(m_program, arguments);
+    QProcess process;
+    process.start(m_program, arguments);
+
+    process.waitForFinished();
+
+    QStringList output = QString(process.readAllStandardOutput()).split("\n");
+
+    qDebug() << output;
+
+    QString errorMessage;
+    foreach (QString line, output) {
+        if(line.startsWith("Main")) {
+            if(line.contains("[ERR]")) {
+                errorMessage = line.split("[ERR]").last();
+            }
+        }
+    }
+
+    if(errorMessage.isEmpty()) {
+        QFile localAccessToken("accessToken.txt");
+        if(localAccessToken.exists()) {
+            localAccessToken.copy(m_accessTokenFile);
+            localAccessToken.remove();
+
+            m_settings->setValue("user", m_userName);
+            m_settings->setValue("password", m_password);
+            m_settings->sync();
+        }
+        qDebug() << "Success";
+        emit loginSuccess();
+    } else {
+        qDebug() << "Failed";
+        emit loginFailed();
+    }
 }
 
 void CliToolConnector::getTokenHandler()
