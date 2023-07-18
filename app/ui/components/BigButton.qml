@@ -1,4 +1,4 @@
-import QtQuick 2.15
+import QtQuick 2.4
 
 Rectangle {
     id: bigButton
@@ -19,7 +19,7 @@ Rectangle {
         anchors.fill: parent
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        font.pixelSize:  bigButton.width/20
+        font.pixelSize:  bigButton.height/3
         color: inverted ? "#2AA9E0" : "#FFFFFF"
     }
 

@@ -3,4 +3,8 @@ builder: cmake
 framework: ubuntu-sdk-20.04
 dependencies_host:
 - cmake-extras
+- golang-1.18
+skip_review: true
 ignore_review_errors: true
+install_bin:
+- ${ROOT}/tools/cli/hide.me

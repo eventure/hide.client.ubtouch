@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QSettings>
 
 class CliToolConnector : public QObject
 {
@@ -13,7 +14,7 @@ public:
     CliToolConnector(QObject* parent = nullptr);
     bool cliAvailable() const;
 
-    void getToken();
+    void getToken(QString user, QString password);
 private slots:
     void getTokenHandler();
 
@@ -27,6 +28,11 @@ private:
     QString m_program;
     QStringList m_baseArgumets;
     QString m_accessTokenFile;
+
+    QSettings* m_settings;
+
+    QString m_userName;
+    QString m_password;
 };
 
 #endif // CLITOOLCONNECTOR_H

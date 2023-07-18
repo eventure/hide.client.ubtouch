@@ -2,6 +2,15 @@
     "policy_version": 20.04,
     "policy_groups": [
         "networking"
+    ],
+    "read_path": [
+        "@{HOME}/.config/",
+        "@{HOME}/.local/share/hideme/"
+    ],
+    "write_path": [
+        "@{HOME}/.config/",
+        "@{HOME}/.local/share/hideme/"
     ]
+
 }
 

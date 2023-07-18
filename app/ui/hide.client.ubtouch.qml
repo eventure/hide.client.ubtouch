@@ -3,16 +3,19 @@ import Lomiri.Components 1.3
 import Lomiri.Components.Popups 1.3
 
 MainView {
-    objectName: "vpnMainView"
     id: mainView
-
+    objectName: "vpnMainView"
     applicationName: "hide.client.ubtouch"
 
+    width: parent.width
+    height: parent.height
+
     backgroundColor: "white"
-    theme.name: "Lomiri.Components.Themes.Suru"
 
     PageStack {
         id: mainStack
+        anchors.fill: parent
+
         Component.onCompleted: {
             if(!haveTools) {
                 push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
@@ -34,6 +37,9 @@ MainView {
             } else {
                 mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
             }
+        }
+        onLoginFailed: {
+            PopupUtils.open(Qt.resolvedUrl("dialogs/LoginFailedDialog.qml"), mainView)
         }
     }
 }

@@ -12,13 +12,13 @@ HideMe::HideMe(int& argc, char** argv)
     , m_connected(false)
     , m_cliConnector(new CliToolConnector(this))
 {
-    setOrganizationName("Hideme");
-    setOrganizationDomain("hide.com");
+    setOrganizationName("HideMe");
+    setOrganizationDomain("hideme.com");
     setApplicationName("HideMe VPN");
 
-    m_settings = new QSettings(this);
+    m_settings = new QSettings("hideconfig.ini");
 
-    m_isLogined = ( !m_settings->value("user").toString().isEmpty() && !m_settings->value("password").toString().isEmpty());
+    m_isLogined = (!m_settings->value("user").toString().isEmpty() && !m_settings->value("password").toString().isEmpty());
 
     connect(m_cliConnector, &CliToolConnector::loginFailed, this, &HideMe::onLoginFailed);
     connect(m_cliConnector, &CliToolConnector::loginSuccess, this, &HideMe::onLoginSucces);
@@ -51,14 +51,15 @@ bool HideMe::setup()
 void HideMe::tryLogin(QString user, QString pass)
 {
     if(user.isEmpty() || pass.isEmpty()) {
+        qDebug() << "empty log or pass";
         return;
     }
 
-    m_settings->setValue("user", user);
-    m_settings->setValue("password", pass);
-    m_settings->sync();
+    if(!m_settings->isWritable()) {
+        qCritical() << "Can't write into settings" << m_settings->fileName();
+    }
 
-    m_cliConnector->getToken();
+    m_cliConnector->getToken(user, pass);
 }
 
 void HideMe::logout()
@@ -78,6 +79,8 @@ void HideMe::onLoginFailed()
     m_settings->setValue("user", "");
     m_settings->setValue("password", "");
     m_settings->sync();
+
+    emit loginFailed();
 }
 
 void HideMe::onLoginSucces()
