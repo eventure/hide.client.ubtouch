@@ -41,9 +41,7 @@ CliToolConnector::CliToolConnector(QObject *parent)
         dataLocation.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     }
 
-    m_accessTokenFile = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/accessToken.txt";
-
-    qDebug() << m_accessTokenFile;
+    m_dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/";
 }
 
 CliToolConnector::~CliToolConnector()
@@ -77,7 +75,7 @@ void CliToolConnector::getToken(QString user, QString password)
     m_cli->setProcessEnvironment(env);
 
     QStringList arguments;
-    arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password  << "-t" << m_accessTokenFile << "token" << server ;
+    arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password  << "-t" << m_dataDir + "accessToken.txt" << "token" << server ;
     QProcess process(this);
     process.start(m_program, arguments);
 
@@ -97,11 +95,8 @@ void CliToolConnector::getToken(QString user, QString password)
     }
 
     if(errorMessage.isEmpty()) {
-        QFile localAccessToken("accessToken.txt");
+        QFile localAccessToken(m_dataDir + "accessToken.txt");
         if(localAccessToken.exists()) {
-            localAccessToken.copy(m_accessTokenFile);
-            localAccessToken.remove();
-
             m_settings->setValue("user", m_userName);
             m_settings->setValue("password", m_password);
             m_settings->sync();
@@ -120,15 +115,20 @@ void CliToolConnector::makeConnection(QString sudoPass)
     QString server = m_settings->value("server", "de.hideservers.net").toString();
 
     m_cli->start("/bin/bash", QStringList());
-    m_cli->write(QString("echo %1 | sudo -S %2 -ca %3 -t %4 -u %5 -P %6 connect %7\n")
-                 .arg(sudoPass)
-                 .arg(m_program)
-                 .arg(m_baseArgumets.at(1))
-                 .arg(m_accessTokenFile)
-                 .arg(m_userName)
-                 .arg(m_password)
-                 .arg(server)
-                 .toUtf8());
+
+    QString command = QString("echo %1 | sudo -S %2 -ca %3 -t %4 -u %5 -P %6 -b %7 connect %8\n")
+            .arg(sudoPass)
+            .arg(m_program)
+            .arg(m_baseArgumets.at(1))
+            .arg(m_dataDir + "accessToken.txt")
+            .arg(m_userName)
+            .arg(m_password)
+            .arg(m_dataDir + "resolv.conf.backup.hide.me")
+            .arg(server);
+
+    qDebug() << "RUN COMMAND" << command;
+
+    m_cli->write(command.toUtf8());
 
     emit startConnecting();
 }

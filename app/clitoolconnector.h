@@ -40,7 +40,7 @@ private:
     QProcess *m_cli;
     QString m_program;
     QStringList m_baseArgumets;
-    QString m_accessTokenFile;
+    QString m_dataDir;
     QString m_errorMessage;
 
     QSettings* m_settings;
