@@ -1,11 +1,15 @@
 import QtQuick 2.4
 import Lomiri.Components 1.3
+import Lomiri.Components.Popups 1.3
 
 import "../components"
 
 Item {
     id: connectionPage
     anchors.fill: parent
+
+    property string sudoPass
+
     Rectangle{
         anchors.fill: parent
         color: "#2AA9E0"
@@ -42,10 +46,14 @@ Item {
             }
 
             onClicked: {
-                if(cli.connected) {
-                    cli.disconnecting("SUDO PASS")
+                if(sudoPass.length == 0) {
+                    onTriggered: PopupUtils.open(Qt.resolvedUrl("../dialogs/SudoPassDialog.qml"), connectionPage)
                 } else {
-                    cli.makeConnection("SUDO PASS")
+                    if(cli.connected) {
+                        cli.disconnecting(sudoPass)
+                    } else {
+                        cli.makeConnection(sudoPass)
+                    }
                 }
             }
         }

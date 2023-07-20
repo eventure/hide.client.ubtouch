@@ -79,7 +79,7 @@ Page {
     }
 
     Connections{
-        target: mApplication
+        target: cli
         onLoginFailed: {
             console.log("FAIL!")
             timoutTimer.stop();

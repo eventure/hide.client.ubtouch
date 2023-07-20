@@ -77,7 +77,7 @@ void CliToolConnector::getToken(QString user, QString password)
     m_cli->setProcessEnvironment(env);
 
     QStringList arguments;
-    arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password << "token" << server << "-f" << m_accessTokenFile ;
+    arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password  << "-t" << m_accessTokenFile << "token" << server ;
     QProcess process(this);
     process.start(m_program, arguments);
 
