@@ -40,6 +40,7 @@ bool HideMe::setup()
     m_view->setTitle(tr("Hide me VPN"));
 
     m_view->rootContext()->setContextProperty("mApplication", this);
+    m_view->rootContext()->setContextProperty("cli", m_cliConnector);
     m_view->rootContext()->setContextProperty("haveTools", m_cliConnector->cliAvailable());
     QUrl source(appDirectory() + "/hide.client.ubtouch.qml");
     m_view->setSource(source);

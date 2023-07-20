@@ -13,38 +13,67 @@ Item {
 
     Image{
         id: statusImage
-        width: parent.width/2
-        height: width
-        source: mApplication.connected ?  "../graphics/vpn_on.png" : "../graphics/vpn_off.png"
+        width: parent.width
+        height: parent.height - controlButtonItem.height - units.gu(8) - parent.height/6
+        source: cli.connected ?  "../../graphics/vpn_on.png" : "../../graphics/vpn_off.png"
         fillMode: Image.PreserveAspectFit
         anchors.centerIn: parent
     }
 
-    BigButton{
-        id: connectButton
-        text: mApplication.connected ? i18n.tr("Disconect") : i18n.tr("Connect")
-        border.color: "#ffffff"
+    Item{
+        id: controlButtonItem
+        width: parent.width
+        height: connectButton.height*2 + units.gu(12)
 
-        width: parent.width - units.gu(6)
         anchors{
-            top: statusImage.bottom
-            topMargin: units.gu(4)
-            horizontalCenter: parent.horizontalCenter
+            bottom: parent.bottom
+        }
+
+        BigButton{
+            id: connectButton
+            text: cli.connected ? i18n.tr("Disconect") : i18n.tr("Connect")
+            border.color: "#ffffff"
+
+            width: parent.width - units.gu(6)
+            anchors{
+                top: controlButtonItem.top
+                topMargin: units.gu(4)
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            onClicked: {
+                if(cli.connected) {
+                    cli.disconnecting("SUDO PASS")
+                } else {
+                    cli.makeConnection("SUDO PASS")
+                }
+            }
+        }
+
+        BigButton{
+            id: logoutButton
+            text: i18n.tr("Logout")
+            border.color: "#ffffff"
+
+            width: parent.width - units.gu(6)
+            anchors{
+                top: connectButton.bottom
+                topMargin: units.gu(4)
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            onClicked: mApplication.logout();
         }
     }
 
-    BigButton{
-        id: logoutButton
-        text: i18n.tr("Logout")
-        border.color: "#ffffff"
-
-        width: parent.width - units.gu(6)
-        anchors{
-            top: connectButton.bottom
-            topMargin: units.gu(4)
-            horizontalCenter: parent.horizontalCenter
+    Connections{
+        target: cli
+        onConnectedChanged: {
+            if(cli.connected) {
+                connectButton.text = i18n.tr("Disconect")
+            } else {
+                connectButton.text = i18n.tr("Connect")
+            }
         }
-
-        onClicked: mApplication.logout();
     }
 }
