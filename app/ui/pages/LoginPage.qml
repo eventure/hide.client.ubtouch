@@ -79,7 +79,7 @@ Page {
     }
 
     Connections{
-        target: mApplication
+        target: cli
         onLoginFailed: {
             console.log("FAIL!")
             timoutTimer.stop();
@@ -91,11 +91,5 @@ Page {
             console.log("SUCC!")
             timoutTimer.stop();
         }
-    }
-
-    Timer {
-        id: timoutTimer
-        interval: 2500;
-        onTriggered: PopupUtils.open(Qt.resolvedUrl("../dialogs/TimeOutDialog.qml"), mainView)
     }
 }

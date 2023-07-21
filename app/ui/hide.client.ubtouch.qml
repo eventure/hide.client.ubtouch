@@ -32,6 +32,7 @@ MainView {
     Connections{
         target: mApplication
         onIsLoginedChanged: {
+            timoutTimer.stop();
             if(mApplication.isLogined) {
                 mainStack.push(Qt.resolvedUrl("pages/ConnectPage.qml"))
             } else {
@@ -39,7 +40,14 @@ MainView {
             }
         }
         onLoginFailed: {
+            timoutTimer.stop();
             PopupUtils.open(Qt.resolvedUrl("dialogs/LoginFailedDialog.qml"), mainView)
         }
+    }
+
+    Timer {
+        id: timoutTimer
+        interval: 2500;
+        onTriggered: PopupUtils.open(Qt.resolvedUrl("dialogs/TimeOutDialog.qml"), mainView)
     }
 }
