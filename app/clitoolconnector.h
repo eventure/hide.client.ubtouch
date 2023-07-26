@@ -16,14 +16,18 @@ public:
     virtual ~CliToolConnector();
     bool cliAvailable() const;
 
+    void getTokenRequest(QString user, QString password);
     void getToken(QString user, QString password);
     bool connected() {return m_connected; }
     Q_INVOKABLE void makeConnection(QString sudoPass);
     Q_INVOKABLE void disconnecting(QString sudoPass);
 
+    Q_INVOKABLE QString getDebugOut() {return m_debugOutput.join("\n");}
+
 private slots:
     void getTokenHandler();
     void onCliToolStarted();
+    void getTokenRequestHandler();
 
 signals:
     void loginFailed();
@@ -40,6 +44,7 @@ private:
     QProcess *m_cli;
     QString m_program;
     QStringList m_baseArgumets;
+    QStringList m_debugOutput;
     QString m_dataDir;
     QString m_errorMessage;
 

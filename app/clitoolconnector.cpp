@@ -6,6 +6,12 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QCoreApplication>
+#include <QNetworkRequest>
+#include <QSslConfiguration>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
@@ -24,6 +30,10 @@ CliToolConnector::CliToolConnector(QObject *parent)
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
     m_password = m_settings->value("password").toString();
+
+    if(!m_userName.isEmpty() && !m_password.isEmpty()) {
+        getTokenRequest(m_userName, m_password);
+    }
 
     QFile cli(m_program);
     m_cliAvailable = cli.exists();
@@ -54,6 +64,56 @@ bool CliToolConnector::cliAvailable() const
     return m_cliAvailable;
 }
 
+void CliToolConnector::getTokenRequest(QString user, QString password)
+{
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl("https://free.hideservers.net:432/v1.0.0/accessToken"));
+    QSslConfiguration sslconf = QSslConfiguration();
+#ifdef WITH_CLICK
+    sslconf.setCaCertificates(QSslCertificate::fromPath(QCoreApplication::applicationDirPath() + "/CA.pem"));
+#else
+    sslconf.setCaCertificates(QSslCertificate::fromPath("/usr/share/hideme/CA.pem"));
+#endif
+    request.setSslConfiguration(sslconf);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject obj;
+    obj["domain"] = "hide.me";
+    obj["host"] = "free";
+    obj["username"] = user;
+    obj["password"] = password;
+    QJsonDocument doc(obj);
+    QByteArray data = doc.toJson();
+
+    QNetworkReply *reply = mgr->post(request, data);
+    connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
+}
+
+
+void CliToolConnector::getTokenRequestHandler()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(!reply) {
+        return;
+    }
+
+    if(reply->error()) {
+        qWarning() << reply->errorString();
+        emit loginFailed();
+        return;
+    }
+
+    QString token = reply->readAll().replace("\"","");
+    QFile tokenFile(m_dataDir + "accessToken.txt");
+
+    if (tokenFile.open(QIODevice::WriteOnly)) {
+        QTextStream out(&tokenFile); out << token;
+        tokenFile.close();
+    }
+
+    loginSuccess();
+}
+
 void CliToolConnector::getToken(QString user, QString password)
 {
     if(!m_cliAvailable) {
@@ -63,50 +123,7 @@ void CliToolConnector::getToken(QString user, QString password)
     m_userName = user;
     m_password = password;
 
-    QString server = m_settings->value("server", "de.hideservers.net").toString();
-
-    if(m_userName.isEmpty() || m_password.isEmpty()) {
-        qCritical() << "user or password is empty";
-        return;
-    }
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("PWD", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)); // Add an environment variable
-    m_cli->setProcessEnvironment(env);
-
-    QStringList arguments;
-    arguments << m_baseArgumets << "-u" << m_userName << "-P" << m_password  << "-t" << m_dataDir + "accessToken.txt" << "token" << server ;
-    QProcess process(this);
-    process.start(m_program, arguments);
-
-    process.waitForFinished();
-
-    QStringList output = QString(process.readAllStandardOutput()).split("\n");
-
-    qDebug() << output;
-
-    QString errorMessage;
-    foreach (QString line, output) {
-        if(line.startsWith("Main")) {
-            if(line.contains("[ERR]")) {
-                errorMessage = line.split("[ERR]").last();
-            }
-        }
-    }
-
-    if(errorMessage.isEmpty()) {
-        QFile localAccessToken(m_dataDir + "accessToken.txt");
-        if(localAccessToken.exists()) {
-            m_settings->setValue("user", m_userName);
-            m_settings->setValue("password", m_password);
-            m_settings->sync();
-        }
-        qDebug() << "Success";
-        emit loginSuccess();
-    } else {
-        qDebug() << "Failed";
-        emit loginFailed();
-    }
+    getTokenRequest(m_userName, m_password);
 }
 
 void CliToolConnector::makeConnection(QString sudoPass)
@@ -143,7 +160,8 @@ void CliToolConnector::disconnecting(QString sudoPass)
 void CliToolConnector::getTokenHandler()
 {
     QStringList output = QString(m_cli->readAllStandardOutput()).split("\n");
-    qDebug() << output;
+    m_debugOutput.append(output);
+
     foreach (QString line, output) {
         if(line.contains("[ERR]")) {
             m_errorMessage = line.split("[ERR]").last();
@@ -181,3 +199,4 @@ void CliToolConnector::onCliToolStarted()
         }
     });
 }
+
