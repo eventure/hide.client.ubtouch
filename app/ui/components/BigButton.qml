@@ -12,7 +12,7 @@ Rectangle {
     implicitWidth: units.gu(25)
     implicitHeight: units.gu(5)
 
-    radius: height/4
+    radius: height/8
 
     Text{
         id: textButton
