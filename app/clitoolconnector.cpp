@@ -87,6 +87,10 @@ void CliToolConnector::getTokenRequest(QString user, QString password)
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
+
+
+    m_userName = user;
+    m_password = password;
 }
 
 
@@ -100,6 +104,10 @@ void CliToolConnector::getTokenRequestHandler()
     if(reply->error()) {
         qWarning() << reply->errorString();
         emit loginFailed();
+
+        m_settings->setValue("user", "");
+        m_settings->setValue("password", "");
+
         return;
     }
 
@@ -112,6 +120,9 @@ void CliToolConnector::getTokenRequestHandler()
     }
 
     loginSuccess();
+
+    m_settings->setValue("user", m_userName);
+    m_settings->setValue("password", m_password);
 }
 
 void CliToolConnector::getToken(QString user, QString password)
