@@ -25,7 +25,7 @@ CliToolConnector::CliToolConnector(QObject *parent)
     , m_program("/usr/bin/hide.me")
 #endif
     , m_connected(false)
-    , m_cliToolPID(0)
+    , m_isReady(false)
 {
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
@@ -37,26 +37,25 @@ CliToolConnector::CliToolConnector(QObject *parent)
 
     QFile cli(m_program);
     m_cliAvailable = cli.exists();
-    m_cli = new QProcess(this);
 
-    connect(m_cli, &QProcess::readyReadStandardOutput, this, &CliToolConnector::getTokenHandler);
-    connect(this, &CliToolConnector::cliStarted, this, &CliToolConnector::onCliToolStarted);
 #ifdef WITH_CLICK
-    m_baseArgumets << "-ca" << QCoreApplication::applicationDirPath() + "/CA.pem";
+     m_caPath = QCoreApplication::applicationDirPath() + "/CA.pem";
 #else
-    m_baseArgumets << "-ca" << "/usr/share/hideme/CA.pem";
+    m_caPath = "/usr/share/hideme/CA.pem";
 #endif
+
     QDir dataLocation(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     if(!dataLocation.exists()) {
         dataLocation.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     }
 
     m_dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/";
+
+    connect(this, &CliToolConnector::loginSuccess, this, &CliToolConnector::initServiceSetup);
 }
 
 CliToolConnector::~CliToolConnector()
 {
-    m_cli->terminate();
 }
 
 bool CliToolConnector::cliAvailable() const
@@ -87,7 +86,6 @@ void CliToolConnector::getTokenRequest(QString user, QString password)
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
-
 
     m_userName = user;
     m_password = password;
@@ -125,6 +123,46 @@ void CliToolConnector::getTokenRequestHandler()
     m_settings->setValue("password", m_password);
 }
 
+void CliToolConnector::initServiceSetup()
+{
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl("http://127.0.0.1:5050/configuration"));
+    request.setRawHeader("Content-Type", "application/json; charset=UTF-8");
+
+    QJsonObject obj;
+    obj["AccessTokenPath"] = m_dataDir + "accessToken.txt";
+    obj["Username"] = m_userName;
+    obj["Password"] = m_password;
+    obj["CA"] = m_caPath;
+    QJsonObject restObj;
+    restObj["Rest"] = obj;
+
+    QJsonDocument doc(restObj);
+    QByteArray data = doc.toJson();
+
+    QNetworkReply *reply = mgr->post(request, data);
+    connect(reply, &QNetworkReply::finished, this, &CliToolConnector::initServiceSetupHandler);
+}
+
+void CliToolConnector::initServiceSetupHandler()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(!reply) {
+        return;
+    }
+
+    if(reply->error()) {
+        qWarning() << reply->errorString();
+    }
+
+    QString output = reply->readAll();
+    qDebug() << Q_FUNC_INFO << output;
+
+    m_isReady = true;
+    emit isReadyChanged();
+}
+
+
 void CliToolConnector::getToken(QString user, QString password)
 {
     if(!m_cliAvailable) {
@@ -141,73 +179,18 @@ void CliToolConnector::makeConnection(QString sudoPass)
 {
     m_errorMessage = "";
     QString server = m_settings->value("server", "de.hideservers.net").toString();
-
-    m_cli->start("/bin/bash", QStringList());
-
-    QString command = QString("echo %1 | sudo -S %2 -ca %3 -t %4 -u %5 -P %6 -b %7 connect %8\n")
-            .arg(sudoPass)
-            .arg(m_program)
-            .arg(m_baseArgumets.at(1))
-            .arg(m_dataDir + "accessToken.txt")
-            .arg(m_userName)
-            .arg(m_password)
-            .arg(m_dataDir + "resolv.conf.backup.hide.me")
-            .arg(server);
-
-    qDebug() << "RUN COMMAND" << command;
-
-    m_cli->write(command.toUtf8());
-
-    emit startConnecting();
 }
 
 void CliToolConnector::disconnecting(QString sudoPass)
 {
-    QProcess* stopAll = new QProcess();
-    stopAll->start("/bin/bash", QStringList());
-    stopAll->write(QString("echo %1 | sudo -S /bin/kill `/bin/pidof -s hide.me`\n").arg(sudoPass).toUtf8());
 }
 
-void CliToolConnector::getTokenHandler()
+bool CliToolConnector::isLogined() const
 {
-    QStringList output = QString(m_cli->readAllStandardOutput()).split("\n");
-    m_debugOutput.append(output);
-
-    foreach (QString line, output) {
-        if(line.contains("[ERR]")) {
-            m_errorMessage = line.split("[ERR]").last();
-        } else if(line.contains("Link: DPD starting")) {
-            m_connected = true;
-            emit connectedChanged();
-            emit cliStarted();
-        } else if(line.contains("Link: Interface vpn deactivated")) {
-            m_connected = false;
-            emit connectedChanged();
-        }
-    }
-
-    if(!m_errorMessage.isEmpty()) {
-        m_connected = false;
-        emit connectedChanged();
-    }
+    return (!m_userName.isEmpty() && !m_password.isEmpty());
 }
 
-void CliToolConnector::onCliToolStarted()
+bool CliToolConnector::isReady() const
 {
-    QStringList processList;
-    QProcess* searchCLI = new QProcess();
-    searchCLI->start("/bin/pidof", QStringList() << "-s" << "hide.me");
-    connect(searchCLI, &QProcess::readyReadStandardOutput, this, [searchCLI, &processList, this]() {
-        QString output = searchCLI->readAllStandardOutput();
-        if(!output.isEmpty()) {
-            qDebug() << output << output.toUInt();
-            uint pid =  output.toUInt();
-            if(pid > 0) {
-                m_cliToolPID = pid;
-                qDebug() << "GOT PID" << m_cliToolPID;
-                emit connected();
-            }
-        }
-    });
+    return m_isReady;
 }
-

@@ -11,62 +11,76 @@ Item {
     property string sudoPass
 
     Rectangle{
-        anchors.fill: parent
-        color: "#2AA9E0"
-    }
-
-    Item{
-        id: statusItem
-        implicitHeight: units.gu(25)
         width: parent.width
-        anchors.bottom: parent.verticalCenter
+        height: parent.height - bottomLine.height
+        color: "#2AA9E0"
 
-        Image{
-            id: statusImage
-            width: height
-            height: units.gu(16)
-            source: cli.connected ?  "../../graphics/vpn_on.png" : "../../graphics/vpn_off.png"
-            fillMode: Image.PreserveAspectFit
-            anchors{
-                top: parent.top
-                topMargin: units.gu(2)
-                horizontalCenter: parent.horizontalCenter
+        Rectangle{
+            anchors.fill: parent
+            color: "#888888"
+            z: 2
+            visible: loading.running
+
+            ActivityIndicator {
+                id: loading
+                anchors.centerIn: parent
+                running: !cli.isReady
             }
         }
 
-        Text{
-            id: locatioText
-            text: i18n.tr("Best Location")
-            color: "#fff"
-            font.pixelSize: units.gu(2)
-            anchors{
-                bottom: parent.bottom
-                bottomMargin: units.gu(1)
-                horizontalCenter: parent.horizontalCenter
+        Item{
+            id: statusItem
+            implicitHeight: units.gu(25)
+            width: parent.width
+            anchors.bottom: parent.verticalCenter
+
+            Image{
+                id: statusImage
+                width: height
+                height: units.gu(16)
+                source: cli.connected ?  "../../graphics/vpn_on.png" : "../../graphics/vpn_off.png"
+                fillMode: Image.PreserveAspectFit
+                anchors{
+                    top: parent.top
+                    topMargin: units.gu(2)
+                    horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+            Text{
+                id: locatioText
+                text: i18n.tr("Best Location")
+                color: "#fff"
+                font.pixelSize: units.gu(2)
+                anchors{
+                    bottom: parent.bottom
+                    bottomMargin: units.gu(1)
+                    horizontalCenter: parent.horizontalCenter
+                }
             }
         }
-    }
 
-    BigButton{
-        id: connectButton
-        text: cli.connected ? i18n.tr("Enable VPN") : i18n.tr("Enable VPN")
-        border.color: "#ffffff"
-        height: units.gu(8)
-        width: parent.width - units.gu(6)
-        anchors{
-            top: statusItem.bottom
-            topMargin: units.gu(3)
-            horizontalCenter: parent.horizontalCenter
-        }
+        BigButton{
+            id: connectButton
+            text: cli.connected ? i18n.tr("Enable VPN") : i18n.tr("Enable VPN")
+            border.color: "#ffffff"
+            height: units.gu(8)
+            width: parent.width - units.gu(6)
+            anchors{
+                top: statusItem.bottom
+                topMargin: units.gu(3)
+                horizontalCenter: parent.horizontalCenter
+            }
 
-        onClicked: {
-            if(sudoPass.length == 0) {
-                onTriggered: PopupUtils.open(Qt.resolvedUrl("../dialogs/SudoPassDialog.qml"), connectionPage)
-            } else {
-                if(cli.connected) {
-                    cli.disconnecting(sudoPass)
+            onClicked: {
+                if(sudoPass.length == 0) {
+                    onTriggered: PopupUtils.open(Qt.resolvedUrl("../dialogs/SudoPassDialog.qml"), connectionPage)
                 } else {
-                    cli.makeConnection(sudoPass)
+                    if(cli.connected) {
+                        cli.disconnecting(sudoPass)
+                    } else {
+                        cli.makeConnection(sudoPass)
+                    }
                 }
             }
         }
@@ -106,31 +120,6 @@ Item {
             }
         }
     }
-
-    /*Item{
-        id: controlButtonItem
-        width: parent.width
-        height: connectButton.height*2 + units.gu(12)
-
-        anchors{
-            bottom: parent.bottom
-        }
-
-        BigButton{
-            id: logoutButton
-            text: i18n.tr("Logout")
-            border.color: "#ffffff"
-
-            width: parent.width - units.gu(6)
-            anchors{
-                top: connectButton.bottom
-                topMargin: units.gu(4)
-                horizontalCenter: parent.horizontalCenter
-            }
-
-            onClicked: mApplication.logout();
-        }
-    }*/
 
     Connections{
         target: cli

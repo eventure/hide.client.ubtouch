@@ -17,10 +17,10 @@ MainView {
         anchors.fill: parent
 
         Component.onCompleted: {
-            if(!haveTools) {
+            if(!cli.cliAvailable) {
                 push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
             } else {
-                if(mApplication.isLogined) {
+                if(cli.isLogined) {
                     push(Qt.resolvedUrl("pages/ConnectPage.qml"))
                 } else {
                     push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
