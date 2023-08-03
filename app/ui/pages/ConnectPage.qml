@@ -11,22 +11,36 @@ Item {
     property string sudoPass
 
     Rectangle{
+        anchors.fill: parent
+        color: "#888888"
+        z: 2
+        visible: loading.running
+
+        ActivityIndicator {
+            id: loading
+            anchors.centerIn: parent
+            running: !cli.isReady
+        }
+
+        Text{
+            id: setupText
+            text: i18n.tr("Prepare to connection...")
+            color: "#fff"
+            font.pixelSize: units.gu(2)
+
+            anchors{
+                top: loading.bottom
+                topMargin: units.gu(1)
+                horizontalCenter: parent.horizontalCenter
+            }
+        }
+    }
+
+    Rectangle{
+        id: connectioArea
         width: parent.width
         height: parent.height - bottomLine.height
         color: "#2AA9E0"
-
-        Rectangle{
-            anchors.fill: parent
-            color: "#888888"
-            z: 2
-            visible: loading.running
-
-            ActivityIndicator {
-                id: loading
-                anchors.centerIn: parent
-                running: !cli.isReady
-            }
-        }
 
         Item{
             id: statusItem

@@ -12,6 +12,7 @@
 #include <QJsonDocument>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QJsonArray>
 
 CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
@@ -155,11 +156,13 @@ void CliToolConnector::initServiceSetupHandler()
         qWarning() << reply->errorString();
     }
 
-    QString output = reply->readAll();
-    qDebug() << Q_FUNC_INFO << output;
-
-    m_isReady = true;
-    emit isReadyChanged();
+    QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+    if(answ["result"] != true) {
+        qWarning() << "wrong configuration!";
+    } else {
+        m_isReady = true;
+        emit isReadyChanged();
+    }
 }
 
 
