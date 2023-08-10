@@ -15,15 +15,9 @@ public:
     virtual ~HideMe();
     bool setup();
 
-private slots:
-    void serviceHandler();
-
 private:
-    void startService();
     QQuickView* m_view;
-
     CliToolConnector* m_cliConnector;
-    QProcess* m_serviceProcess;
 };
 
 #endif // HIDEME_H

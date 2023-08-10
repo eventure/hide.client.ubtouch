@@ -16,21 +16,11 @@ MainView {
         id: mainStack
         anchors.fill: parent
 
-        Component.onCompleted: {
-            if(!cli.cliAvailable) {
-                push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
-            } else {
-                if(cli.isLogined) {
-                    push(Qt.resolvedUrl("pages/ConnectPage.qml"))
-                } else {
-                    push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
-                }
-            }
-        }
+        Component.onCompleted: initPage();
     }
 
     Connections{
-        target: mApplication
+        target: cli
         onIsLoginedChanged: {
             timoutTimer.stop();
             if(mApplication.isLogined) {
@@ -43,11 +33,44 @@ MainView {
             timoutTimer.stop();
             PopupUtils.open(Qt.resolvedUrl("dialogs/LoginFailedDialog.qml"), mainView)
         }
+
+        onServerStaertedChanged: {
+            if(!cli.serverStaerted) {
+                mainStack.clear();
+                mainStack.push(Qt.resolvedUrl("pages/StartServicePage.qml"), {})
+            } else {
+                initPage()
+            }
+        }
+
+        onIsReadyChanged: {
+            if(cli.isReady) {
+                checkStatus.start();
+                initPage()
+            } else {
+                mainStack.clear();
+                mainStack.push(Qt.resolvedUrl("pages/StartServicePage.qml"), {})
+            }
+        }
     }
 
     Timer {
         id: timoutTimer
         interval: 2500;
         onTriggered: PopupUtils.open(Qt.resolvedUrl("dialogs/TimeOutDialog.qml"), mainView)
+    }
+
+    function initPage() {
+        if(!cli.cliAvailable) {
+            mainStack.push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
+        } else {
+            if(!cli.serverStaerted) {
+                mainStack.push(Qt.resolvedUrl("pages/StartServicePage.qml"), {})
+            } else  if(cli.isLogined) {
+                mainStack.push(Qt.resolvedUrl("pages/ConnectPage.qml"), {})
+            } else {
+                mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
+            }
+        }
     }
 }

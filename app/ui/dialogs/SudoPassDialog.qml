@@ -5,8 +5,14 @@ import Lomiri.Components.Popups 1.3
 Dialog {
     id: sudoPassDialog
 
-    Label {
+    Text {
+        id: labelText
         text: i18n.tr("Enther administrator password")
+        width: passField.width
+        height: units.gu(2)
+        font.bold: true
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
     }
 
     TextField{
@@ -15,17 +21,19 @@ Dialog {
     }
 
     Button {
-        text: cli.connected ? i18n.tr("Dissconnect") : i18n.tr("Connect")
+        text: i18n.tr("Start service")
         onClicked: {
-            connectionPage.sudoPass = passField.text
+            cli.startService(passField.text)
+        }
+    }
 
-            if(cli.connected) {
-                cli.disconnecting(connectionPage.sudoPass)
-            } else {
-                cli.makeConnection(connectionPage.sudoPass)
+
+    Connections{
+        target: cli
+        onIsReadyChanged: {
+            if(cli.isReady) {
+                PopupUtils.close(sudoPassDialog)
             }
-
-            PopupUtils.close(sudoPassDialog)
         }
     }
 }

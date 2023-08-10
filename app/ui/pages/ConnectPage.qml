@@ -87,15 +87,4 @@ Item {
             }
         }
     }
-
-    Connections{
-        target: cli
-        onConnectedChanged: {
-            if(cli.connected) {
-                connectButton.text = i18n.tr("Disconect")
-            } else {
-                connectButton.text = i18n.tr("Connect")
-            }
-        }
-    }
 }

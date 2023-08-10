@@ -54,15 +54,20 @@ Rectangle{
         }
 
         onClicked: {
-            if(sudoPass.length == 0) {
-                onTriggered: PopupUtils.open(Qt.resolvedUrl("../../dialogs/SudoPassDialog.qml"), connectionPage)
+            cli.connected = !cli.connected
+        }
+    }
+
+
+    Connections{
+        target: cli
+        onConnectedChanged: {
+            if(cli.connected) {
+                connectButton.text = i18n.tr("Disconect")
             } else {
-                if(cli.connected) {
-                    cli.disconnecting(sudoPass)
-                } else {
-                    cli.makeConnection(sudoPass)
-                }
+                connectButton.text = i18n.tr("Connect")
             }
+            cli.connected = !cli.connected
         }
     }
 }
