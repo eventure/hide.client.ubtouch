@@ -1,6 +1,9 @@
 #include "hideme.h"
 #include "config.h"
 
+#include <QJsonDocument>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QQmlContext>
 #include <QSettings>
 #include <QStandardPaths>
@@ -8,20 +11,11 @@
 HideMe::HideMe(int& argc, char** argv)
     : QApplication(argc, argv)
     , m_view(nullptr)
-    , m_isLogined(false)
-    , m_connected(false)
     , m_cliConnector(new CliToolConnector(this))
 {
     setOrganizationName("HideMe");
     setOrganizationDomain("hideme.com");
     setApplicationName("HideMe VPN");
-
-    m_settings = new QSettings("hideconfig.ini");
-
-    m_isLogined = (!m_settings->value("user").toString().isEmpty() && !m_settings->value("password").toString().isEmpty());
-
-    connect(m_cliConnector, &CliToolConnector::loginFailed, this, &HideMe::onLoginFailed);
-    connect(m_cliConnector, &CliToolConnector::loginSuccess, this, &HideMe::onLoginSucces);
 }
 
 HideMe::~HideMe()
@@ -47,45 +41,4 @@ bool HideMe::setup()
     m_view->show();
 
     return true;
-}
-
-void HideMe::tryLogin(QString user, QString pass)
-{
-    if(user.isEmpty() || pass.isEmpty()) {
-        qDebug() << "empty log or pass";
-        return;
-    }
-
-    if(!m_settings->isWritable()) {
-        qCritical() << "Can't write into settings" << m_settings->fileName();
-    }
-
-    m_cliConnector->getToken(user, pass);
-}
-
-void HideMe::logout()
-{
-    m_settings->setValue("user", "");
-    m_settings->setValue("password", "");
-    m_settings->sync();
-
-    QFile(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/accessToken.txt").remove();
-
-    m_isLogined = false;
-    emit isLoginedChanged();
-}
-
-void HideMe::onLoginFailed()
-{
-    m_settings->setValue("user", "");
-    m_settings->setValue("password", "");
-    m_settings->sync();
-
-    emit loginFailed();
-}
-
-void HideMe::onLoginSucces()
-{
-    m_isLogined = true;
-    emit isLoginedChanged();
 }

@@ -66,7 +66,7 @@ Page {
             onClicked: {
                 timoutTimer.start();
                 loading.running = true
-                mApplication.tryLogin(usernameField.text, passwordField.text)
+                cli.getTokenRequest(usernameField.text, passwordField.text)
             }
         }
     }
