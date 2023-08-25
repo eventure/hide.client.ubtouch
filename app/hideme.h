@@ -6,6 +6,7 @@
 #include <QSettings>
 
 #include "clitoolconnector.h"
+#include "servicemanager.h"
 
 class HideMe : public QApplication {
     Q_OBJECT
@@ -18,6 +19,7 @@ public:
 private:
     QQuickView* m_view;
     CliToolConnector* m_cliConnector;
+    ServiceManager* m_serviceManager;
 };
 
 #endif // HIDEME_H

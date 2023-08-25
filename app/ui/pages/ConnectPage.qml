@@ -8,9 +8,10 @@ Item {
     id: connectionPage
     anchors.fill: parent
 
-    property string sudoPass
+    property bool isReady: false
 
     Rectangle{
+        id: popOver
         anchors.fill: parent
         color: "#888888"
         z: 2
@@ -80,11 +81,17 @@ Item {
                     onClicked: {
                         if(bottomLineModel.currentIndex != index) {
                             bottomLineModel.currentIndex = index
-                            mainAreaLoader.source = page
                         }
                     }
                 }
             }
+        }
+    }
+
+    Connections{
+        target: bottomLineModel
+        onCurrentIndexChanged: {
+            mainAreaLoader.source = bottomLineModel.get(bottomLineModel.currentIndex).page
         }
     }
 }

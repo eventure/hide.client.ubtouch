@@ -7,11 +7,13 @@
 #include <QQmlContext>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QQmlEngine>
 
 HideMe::HideMe(int& argc, char** argv)
     : QApplication(argc, argv)
     , m_view(nullptr)
     , m_cliConnector(new CliToolConnector(this))
+    , m_serviceManager(new ServiceManager(this))
 {
     setOrganizationName("HideMe");
     setOrganizationDomain("hideme.com");
@@ -27,6 +29,8 @@ HideMe::~HideMe()
 
 bool HideMe::setup()
 {
+    qmlRegisterType<ServiceManager>("hide.me", 1, 0, "ServiceManager");
+    qmlRegisterType<CliToolConnector>("hide.me", 1, 0, "CliToolConnector");
     m_view = new QQuickView();
     m_view->setColor(Qt::white);
     m_view->setResizeMode(QQuickView::SizeViewToRootObject);
@@ -34,8 +38,6 @@ bool HideMe::setup()
     m_view->setTitle(tr("Hide me VPN"));
 
     m_view->rootContext()->setContextProperty("mApplication", this);
-    m_view->rootContext()->setContextProperty("cli", m_cliConnector);
-    m_view->rootContext()->setContextProperty("haveTools", m_cliConnector->cliAvailable());
     QUrl source(appDirectory() + "/hide.client.ubtouch.qml");
     m_view->setSource(source);
     m_view->show();

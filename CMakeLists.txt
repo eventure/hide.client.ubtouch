@@ -56,7 +56,7 @@ add_custom_target(${DESKTOP_FILE} ALL
             -d ${CMAKE_SOURCE_DIR}/po
 )
 
-find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick DBus REQUIRED)
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
 add_subdirectory(app)
@@ -70,6 +70,7 @@ if(CLICK_MODE)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}  DESTINATION /)
     install(DIRECTORY app/graphics DESTINATION DESTINATION /ui/)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CA.pem  DESTINATION /)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/hideme.service  DESTINATION /)
 else(CLICK_MODE)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DESKTOP_FILE}  DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES ${SRC_FILES} ${ICON_FILE} DESTINATION DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)

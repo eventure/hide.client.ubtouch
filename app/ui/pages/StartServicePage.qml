@@ -69,7 +69,7 @@ Page {
                 bottomMargin: units.gu(2)
                 horizontalCenter: parent.horizontalCenter
             }
-            //enabled: passField.text.length > 5
+            enabled: passField.text.length > 5
 
             onClicked: {
                 if(passField.text.length > 5) {
