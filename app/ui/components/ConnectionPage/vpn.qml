@@ -1,5 +1,6 @@
 import QtQuick 2.4
 import Lomiri.Components 1.3
+import hide.me 1.0
 
 import "../"
 
@@ -8,6 +9,39 @@ Rectangle{
     width: parent.width
     height: parent.height
     color: "#2AA9E0"
+
+    function calculateStatusProp() {
+        switch(serviceManager.currentStatus) {
+        case ServiceManager.UNKNOW:
+        case ServiceManager.NOT_INSTALLED:
+            statusImage.source = "../../../graphics/vpn_warn.png"
+            connectButton.text = qsTr("Setup service first")
+            return;
+        case ServiceManager.NOT_STARTED:
+            statusImage.source = "../../../graphics/vpn_warn.png"
+            connectButton.text = qsTr("Service not started")
+            return;
+        case ServiceManager.STARTED:
+        case ServiceManager.DISCONNECTED:
+            statusImage.source ="../../../graphics/vpn_off.png";
+            connectButton.text = qsTr("Connect")
+            return;
+        case ServiceManager.DISCONNECTING:
+            statusImage.source = "../../../graphics/vpn_inprogress.png";
+            connectButton.text = qsTr("Disconnecting...")
+            return;
+        case ServiceManager.CONNECTING:
+            statusImage.source = "../../../graphics/vpn_inprogress.png";
+            connectButton.text = qsTr("Connecting...")
+            return;
+        case ServiceManager.CONNECTED:
+            statusImage.source = "../../../graphics/vpn_on.png";
+            connectButton.text = qsTr("Disconnect")
+            return;
+        }
+    }
+
+    Component.onCompleted: calculateStatusProp();
 
     Item{
         id: statusItem
@@ -19,7 +53,6 @@ Rectangle{
             id: statusImage
             width: height
             height: units.gu(16)
-            source: cli.connected ?  "../../../graphics/vpn_on.png" : "../../../graphics/vpn_off.png"
             fillMode: Image.PreserveAspectFit
             anchors{
                 top: parent.top
@@ -43,7 +76,6 @@ Rectangle{
 
     BigButton{
         id: connectButton
-        text: cli.connected ? i18n.tr("Enable VPN") : i18n.tr("Enable VPN")
         border.color: "#ffffff"
         height: units.gu(8)
         width: parent.width - units.gu(6)
@@ -54,20 +86,21 @@ Rectangle{
         }
 
         onClicked: {
-            cli.connected = !cli.connected
+            if(serviceManager.currentStatus == ServiceManager.NOT_INSTALLED
+                    || serviceManager.currentStatus == ServiceManager.UNKNOW
+                    || serviceManager.currentStatus == ServiceManager.NOT_STARTED) {
+                // go to settings page
+                bottomLineModel.currentIndex = 2
+            } else if(serviceManager.currentStatus == ServiceManager.STARTED ) {
+                cli.makeConnection()
+            } else if(serviceManager.currentStatus == ServiceManager.CONNECTED) {
+                cli.makeDisconnection()
+            }
         }
     }
 
-
     Connections{
-        target: cli
-        onConnectedChanged: {
-            if(cli.connected) {
-                connectButton.text = i18n.tr("Disconect")
-            } else {
-                connectButton.text = i18n.tr("Connect")
-            }
-            cli.connected = !cli.connected
-        }
+        target: serviceManager
+        onCurrentStatusChanged: calculateStatusProp()
     }
 }

@@ -7,7 +7,7 @@ Rectangle {
     property alias text: textButton.text
     signal clicked();
 
-    color: inverted ? "#FFFFFF" : "#2AA9E0"
+    color: enabled ? inverted ? "#FFFFFF" : "#2AA9E0" : "#888888"
 
     implicitWidth: units.gu(25)
     implicitHeight: units.gu(5)

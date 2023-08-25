@@ -66,7 +66,8 @@ Page {
             onClicked: {
                 timoutTimer.start();
                 loading.running = true
-                cli.getTokenRequest(usernameField.text, passwordField.text)
+                cli.setLoginPass(usernameField.text, passwordField.text)
+                cli.getTokenRequest()
             }
         }
     }
@@ -81,15 +82,10 @@ Page {
     Connections{
         target: cli
         onLoginFailed: {
-            console.log("FAIL!")
             timoutTimer.stop();
             loading.running = false
             usernameField.text = ""
             passwordField.text = ""
-        }
-        onLoginSuccess: {
-            console.log("SUCC!")
-            timoutTimer.stop();
         }
     }
 }

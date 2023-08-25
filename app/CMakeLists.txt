@@ -11,7 +11,11 @@ set(SRC
     clitoolconnector.h
     main.cpp
     hideme.cpp
-    hideme.h)
+    hideme.h
+    socektconnector.cpp
+    socektconnector.h
+    servicemanager.cpp
+    servicemanager.h)
 
 add_executable(hideme ${SRC})
 
@@ -20,7 +24,8 @@ target_link_libraries(hideme
     Qt5::Widgets
     Qt5::Qml
     Qt5::Quick
-    Qt5::Gui)
+    Qt5::Gui
+    Qt5::DBus)
 
 install(TARGETS hideme RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(CLICK_MODE)
