@@ -68,8 +68,6 @@ signals:
 private slots:
     void initServiceSetup();
     void initServiceSetupHandler();
-    void loadServiceConfig();
-    void loadServiceConfigHandler();
 
     void startServiceHandler();
 

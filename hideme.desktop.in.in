@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Hide Me
+Name=hide.me VPN
 Comment=VPN application
 Type=Application
 Terminal=false
@@ -12,4 +12,3 @@ X-Lomiri-Splash-Color=#2AA9E0
 X-Lomiri-Splash-Color-Footer=#FFFFFF
 X-Lomiri-Splash-Color-Header=#EFFFFF
 X-Lomiri-Splash-Image=@SPLASH@
-

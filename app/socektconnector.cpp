@@ -32,6 +32,9 @@ void SocektConnector::getState()
 
         QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
         QString code = answ["result"].toObject().value("code").toString();
+
+        qDebug() << "Current state is:" << code;
+
         if(code != m_code) {
             m_code = code;
             emit codeChanged();

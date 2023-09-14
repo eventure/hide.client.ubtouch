@@ -15,7 +15,9 @@ set(SRC
     socektconnector.cpp
     socektconnector.h
     servicemanager.cpp
-    servicemanager.h)
+    servicemanager.h
+     serverselectionmodel.cpp
+    serverselectionmodel.h)
 
 add_executable(hideme ${SRC})
 

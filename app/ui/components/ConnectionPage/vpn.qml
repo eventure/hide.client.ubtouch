@@ -41,7 +41,23 @@ Rectangle{
         }
     }
 
-    Component.onCompleted: calculateStatusProp();
+    Component.onCompleted: {
+        calculateStatusProp();
+        var location = serverSelectionModel.get(cli.hostName)["displayName"]
+        if(location != "") {
+            locationText.text = location
+        }
+    }
+
+    Connections{
+        target: serverSelectionModel
+        onRowCountChanged: locationText.text = serverSelectionModel.get(cli.hostName)["displayName"]
+    }
+
+    Connections{
+        target: cli
+        onHostNameChanged: locationText.text = serverSelectionModel.get(cli.hostName)["displayName"]
+    }
 
     Item{
         id: statusItem
@@ -62,7 +78,7 @@ Rectangle{
         }
 
         Text{
-            id: locatioText
+            id: locationText
             text: i18n.tr("Best Location")
             color: "#fff"
             font.pixelSize: units.gu(2)
