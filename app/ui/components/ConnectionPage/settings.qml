@@ -37,7 +37,7 @@ Rectangle{
         ListElement { type: "item"; name: qsTr("Quit"); }
         ListElement { type: "item"; name: qsTr("Logout"); }
         ListElement { type: "group"; name: qsTr("About"); }
-        ListElement { type: "item"; name: qsTr("Manage accout"); }
+        ListElement { type: "item"; name: qsTr("Manage account"); }
         ListElement { type: "item"; name: qsTr("FAQ"); }
         ListElement { type: "item"; name: qsTr("Contact support"); }
         ListElement { type: "item"; name: qsTr("About"); }
