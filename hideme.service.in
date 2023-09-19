@@ -3,7 +3,7 @@ Description=Hideme background service
 
 [Service]
 Type=simple
-ExecStart=/opt/click.ubuntu.com/hideme.ubports/current/lib/aarch64-linux-gnu/bin/hide.me --caddr 127.0.0.1:5050 service
+ExecStart=@CLI_PATH@ --caddr 127.0.0.1:5050 service
 Restart=always
 TimeoutStartSec=60
 
