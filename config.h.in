@@ -17,7 +17,7 @@ inline QString appDirectory()
         return QString("%1/ui/").arg(QString(QCoreApplication::applicationDirPath()));
         qDebug() << "Click";
     } else if (isRunningInstalled()) {
-        qDebug() << "Descktop";
+        qDebug() << "Desktop";
         return QString("@CMAKE_INSTALL_FULL_DATADIR@/@APP_NAME@/ui");
     } else {
         qDebug() << "Develop";

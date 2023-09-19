@@ -100,8 +100,8 @@ void CliToolConnector::getTokenRequest()
     QJsonObject obj;
     obj["domain"] = "hide.me";
     obj["host"] = "free";
-    obj["username"] = m_userName;
-    obj["password"] = m_password;
+    obj["username"] = m_userName.simplified().remove(' ');
+    obj["password"] = m_password.simplified().remove(' ');
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
 

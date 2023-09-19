@@ -39,6 +39,7 @@ ServiceManager::ServiceManager(QObject *parent)
     connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
 
     QFile cli(m_program);
+    qDebug() << m_program;
     m_cliAvailable = cli.exists();
 
     if (!m_systemDBusConnection.isConnected()) {
@@ -223,8 +224,11 @@ void ServiceManager::installServies()
     //FIXME need adapt to nonclick package
     QProcess *serviceInstallProcess = new QProcess();
     serviceInstallProcess->start("/bin/bash" , QStringList());
+#ifdef WITH_CLICK
     serviceInstallProcess->write(QString("echo '%1' | sudo -S cp /opt/click.ubuntu.com/hideme.ubports/current/hideme.service /etc/systemd/system/\n").arg(m_rootPassword).toUtf8());
-
+#else
+    serviceInstallProcess->write(QString("echo '%1' | sudo -S cp /usr/share/hideme/hideme.service /etc/systemd/system/\n").arg(m_rootPassword).toUtf8());
+#endif
 
     /*daemons reload*/
     QProcess *daemoReloadProcess = new QProcess();
@@ -309,7 +313,6 @@ QString ServiceManager::rootPassword() const
 
 void ServiceManager::setRootPassword(const QString &newRootPassword)
 {
-    qDebug() << Q_FUNC_INFO << newRootPassword;
     if (m_rootPassword == newRootPassword)
         return;
     m_rootPassword = newRootPassword;
