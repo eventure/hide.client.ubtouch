@@ -23,6 +23,7 @@ CliToolConnector::CliToolConnector(QObject *parent)
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
     m_password = m_settings->value("password").toString();
+    m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
 
     if(!m_userName.isEmpty() && !m_password.isEmpty()) {
         getTokenRequest();
@@ -50,6 +51,32 @@ void CliToolConnector::setLoginPass(const QString usermame, const QString passwo
         m_userName = usermame;
         m_password = password;
     }
+}
+
+void CliToolConnector::setParam(const QString param, const QString value)
+{
+    if(param.isEmpty() || value.isEmpty()) {
+        qWarning() << "Empty param or value";
+        return;
+    }
+
+    QJsonObject obj;
+    obj[param] = value;
+
+    QJsonObject rest;
+    rest["Rest"] = obj;
+
+    QJsonDocument doc(rest);
+    QByteArray data = doc.toJson();
+
+    QString url = m_settings->value("url", "127.0.0.1").toString();
+    int port = m_settings->value("port", 5050).toInt();
+
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(url).arg(port)));
+
+    QNetworkReply *reply = mgr->post(request, data);
+    connect(reply, &QNetworkReply::finished, this, &CliToolConnector::setParamRequestHandler);
 }
 
 void CliToolConnector::getTokenRequest()
@@ -105,6 +132,29 @@ void CliToolConnector::makeDisconnection()
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::requestHandler);
 }
 
+void CliToolConnector::changeFavorite(int serverId)
+{
+    bool stared = m_settings->value("favoriteServers").toString().split(";").contains(QString::number(serverId));
+    if(stared) {
+        QStringList currSettings = m_settings->value("favoriteServers").toString().split(";");
+        currSettings.removeAll(QString::number(serverId));
+        m_settings->setValue("favoriteServers", currSettings.join(";"));
+    } else {
+        m_settings->setValue("favoriteServers", m_settings->value("favoriteServers").toString() + ";" + QString::number(serverId));
+    }
+    m_settings->sync();
+}
+
+bool CliToolConnector::isFavoriteServer(int serverId)
+{
+    return m_settings->value("favoriteServers").toString().split(";").contains(QString::number(serverId));
+}
+
+bool CliToolConnector::isDefaultServer(QString hostname)
+{
+    return m_settings->value("defaultHost").toString() == hostname;
+}
+
 void CliToolConnector::requestHandler() {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
     if(!reply) {
@@ -120,6 +170,63 @@ void CliToolConnector::requestHandler() {
         QString message = answ["error"].toObject().value("message").toString();
 
         emit error(title, message);
+    } else {
+        loadServiceConfig();
+    }
+}
+
+void CliToolConnector::setParamRequestHandler()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(!reply) {
+        return;
+    }
+    if(reply->error()) {
+        qWarning() << reply->errorString();
+    }
+
+    QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+    if(!answ["error"].isUndefined()) {
+        QString title = answ["error"].toObject().value("code").toString();
+        QString message = answ["error"].toObject().value("message").toString();
+
+        emit error(title, message);
+    } else {
+        loadServiceConfig();
+    }
+}
+
+void CliToolConnector::loadServiceConfig()
+{
+    QString url = m_settings->value("url", "127.0.0.1").toString();
+    int port = m_settings->value("port", 5050).toInt();
+
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(url).arg(port)));
+    QNetworkReply *reply = mgr->get(request);
+
+    connect(reply, &QNetworkReply::finished, this, &CliToolConnector::loadServiceConfigHandler);
+}
+
+void CliToolConnector::loadServiceConfigHandler()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(!reply) {
+        return;
+    }
+
+    if(reply->error()) {
+        qWarning() << reply->errorString();
+    }
+
+    QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+    if(!answ["error"].isUndefined()) {
+        QString title = answ["error"].toObject().value("code").toString();
+        QString message = answ["error"].toObject().value("message").toString();
+
+        emit error(title, message);
+    } else {
+        setHostName(answ["Rest"].toObject().value("Host").toString());
     }
 }
 
@@ -167,4 +274,31 @@ bool CliToolConnector::isReady() const
 QString CliToolConnector::token() const
 {
     return m_token;
+}
+
+QString CliToolConnector::defaultHostName() const
+{
+    return m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
+}
+
+void CliToolConnector::setDefaultHostName(const QString &newDefaultHostName)
+{
+    if (m_settings->value("defaultHost").toString() == newDefaultHostName) {
+        return;
+    }
+    m_settings->setValue("defaultHost",newDefaultHostName);
+    emit defaultHostNameChanged();
+}
+
+QString CliToolConnector::hostName() const
+{
+    return m_hostName;
+}
+
+void CliToolConnector::setHostName(const QString &newHostName)
+{
+    if (m_hostName == newHostName)
+        return;
+    m_hostName = newHostName;
+    emit hostNameChanged();
 }

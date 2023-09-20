@@ -186,6 +186,7 @@ void ServiceManager::setAccessToken(QString token)
 void ServiceManager::checkServerStatus(QDBusPendingCallWatcher* watcher)
 {
     if(m_currentStatus == ServiceManager::NOT_INSTALLED) {
+        qWarning() << "Service not installed";
         return;
     }
 
@@ -198,6 +199,8 @@ void ServiceManager::checkServerStatus(QDBusPendingCallWatcher* watcher)
     }
 
     ServiceManager::ServiceStatus newStatus;
+    qDebug() << "Server status is" << reply.value();
+
     if(reply.value() == "active") {
         newStatus = ServiceStatus::STARTED;
     } else {
@@ -255,7 +258,6 @@ bool ServiceManager::cliAvailable() const
 void ServiceManager::initServiceSetup()
 {
     if(m_currentStatus != ServiceStatus::STARTED || m_accessToken.isEmpty()) {
-        qDebug() << "NO! NO!";
         return;
     }
 
@@ -272,7 +274,7 @@ void ServiceManager::initServiceSetup()
 #else
     obj["CA"] = "/usr/share/hideme/CA.pem";
 #endif
-    obj["Host"] = "nl.hideservers.net";
+    obj["Host"] = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
 
     QJsonObject restObj;
     restObj["Rest"] = obj;
@@ -292,30 +294,6 @@ void ServiceManager::initServiceSetupHandler()
     }
 
     qDebug() << reply->readAll();
-}
-
-void ServiceManager::loadServiceConfig()
-{
-    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(m_url).arg(m_port)));
-    QNetworkReply *reply = mgr->get(request);
-
-    connect(reply, &QNetworkReply::finished, this, &ServiceManager::loadServiceConfigHandler);
-}
-
-void ServiceManager::loadServiceConfigHandler()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
-    if(!reply) {
-        return;
-    }
-
-    if(reply->error()) {
-        qWarning() << reply->errorString();
-    }
-
-    QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
-    qDebug() << answ;
 }
 
 void ServiceManager::startServiceHandler()

@@ -37,6 +37,15 @@ Item {
         }
     }
 
+    QuickConnectItem{
+        id: quickConnectItem
+        visible: false
+        anchors{
+            top: connectionPage.top
+            left: connectionPage.left
+        }
+    }
+
     Loader{
         id: mainAreaLoader
         width: parent.width
@@ -49,7 +58,7 @@ Item {
         id: bottomLine
         width: parent.width
         height: units.gu(10)
-
+        color: "#F8FBFC"
         anchors{
             bottom: parent.bottom
         }
@@ -92,6 +101,16 @@ Item {
         target: bottomLineModel
         onCurrentIndexChanged: {
             mainAreaLoader.source = bottomLineModel.get(bottomLineModel.currentIndex).page
+        }
+    }
+
+    Connections{
+        target: serverSelectionModel
+        onServerActivated: {
+            quickConnectItem.flag = server["flag"]
+            quickConnectItem.serverId = server["serverId"]
+            quickConnectItem.hostName = server["hostname"]
+            quickConnectItem.visible = true
         }
     }
 }
