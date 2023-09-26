@@ -37,10 +37,10 @@ Rectangle{
         ListElement { type: "item"; name: qsTr("Quit"); }
         ListElement { type: "item"; name: qsTr("Logout"); }
         ListElement { type: "group"; name: qsTr("About"); }
-        ListElement { type: "item"; name: qsTr("Manage account"); }
-        ListElement { type: "item"; name: qsTr("FAQ"); }
-        ListElement { type: "item"; name: qsTr("Contact support"); }
-        ListElement { type: "item"; name: qsTr("About"); }
+        ListElement { type: "item"; name: qsTr("Manage account"); action: "extended"; url: "https://member.hide.me"}
+        ListElement { type: "item"; name: qsTr("FAQ"); action: "extended"; url: "https://hide.me/en/knowledgebase/hide-me-vpn-for-ubuntu-touch-faq"}
+        ListElement { type: "item"; name: qsTr("Current update"); action: "extended"; url: "https://hide.me/download/ubtouch"}
+        ListElement { type: "item"; name: qsTr("About"); action: "extended"; url: "https://hide.me"}
     }
 
     ListView{
@@ -75,6 +75,10 @@ Rectangle{
                 onClicked: {
                     if(action == "page") {
                         mainStack.push(Qt.resolvedUrl(page), {})
+                    }
+
+                    if(action == "extended") {
+                        Qt.openUrlExternally(url)
                     }
                 }
             }
