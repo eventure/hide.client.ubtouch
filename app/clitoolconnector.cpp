@@ -155,6 +155,19 @@ bool CliToolConnector::isDefaultServer(QString hostname)
     return m_settings->value("defaultHost").toString() == hostname;
 }
 
+void CliToolConnector::logout()
+{
+    m_settings->setValue("user", "");
+    m_settings->setValue("password", "");
+    m_token = "";
+    emit isLoginedChanged();
+}
+
+void CliToolConnector::quit()
+{
+    qApp->quit();
+}
+
 void CliToolConnector::requestHandler() {
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
     if(!reply) {

@@ -34,8 +34,8 @@ Rectangle{
         ListElement { type: "group"; name: qsTr("Service"); }
         ListElement { type: "item"; name: qsTr("Setup VPN service"); action: "page"; page: "../../pages/SetupServicesPage.qml" }
         ListElement { type: "group"; name: qsTr("User"); }
-        ListElement { type: "item"; name: qsTr("Quit"); }
-        ListElement { type: "item"; name: qsTr("Logout"); }
+        ListElement { type: "item"; name: qsTr("Quit"); action: "script"; doit: "quit"}
+        ListElement { type: "item"; name: qsTr("Logout"); action: "script"; doit: "logout"}
         ListElement { type: "group"; name: qsTr("About"); }
         ListElement { type: "item"; name: qsTr("Manage account"); action: "extended"; url: "https://member.hide.me"}
         ListElement { type: "item"; name: qsTr("FAQ"); action: "extended"; url: "https://hide.me/en/knowledgebase/hide-me-vpn-for-ubuntu-touch-faq"}
@@ -79,6 +79,17 @@ Rectangle{
 
                     if(action == "extended") {
                         Qt.openUrlExternally(url)
+                    }
+
+                    if(action == "script") {
+                        if(doit == "logout") {
+                            cli.makeDisconnection()
+                            cli.logout();
+                        }
+
+                        if(doit == "quit") {
+                            cli.quit();
+                        }
                     }
                 }
             }

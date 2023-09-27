@@ -26,6 +26,8 @@ public:
     Q_INVOKABLE void changeFavorite(int serverId);
     Q_INVOKABLE bool isFavoriteServer(int serverId);
     Q_INVOKABLE bool isDefaultServer(QString hostname);
+    Q_INVOKABLE void logout();
+    Q_INVOKABLE void quit();
     bool connected() {return m_connected; }
 
     Q_INVOKABLE QString getDebugOut() {return m_debugOutput.join("\n");}
