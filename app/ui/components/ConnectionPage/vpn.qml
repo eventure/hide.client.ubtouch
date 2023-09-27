@@ -106,7 +106,7 @@ Rectangle{
                     || serviceManager.currentStatus == ServiceManager.UNKNOW
                     || serviceManager.currentStatus == ServiceManager.NOT_STARTED) {
                 // go to settings page
-                bottomLineModel.currentIndex = 2
+                mainStack.push(Qt.resolvedUrl("../../pages/SetupServicesPage.qml"), {})
             } else if(serviceManager.currentStatus == ServiceManager.STARTED ) {
                 cli.makeConnection()
             } else if(serviceManager.currentStatus == ServiceManager.CONNECTED) {
