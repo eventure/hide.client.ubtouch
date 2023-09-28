@@ -131,24 +131,6 @@ void CliToolConnector::makeDisconnection()
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::requestHandler);
 }
 
-void CliToolConnector::changeFavorite(int serverId)
-{
-    bool stared = m_settings->value("favoriteServers").toString().split(";").contains(QString::number(serverId));
-    if(stared) {
-        QStringList currSettings = m_settings->value("favoriteServers").toString().split(";");
-        currSettings.removeAll(QString::number(serverId));
-        m_settings->setValue("favoriteServers", currSettings.join(";"));
-    } else {
-        m_settings->setValue("favoriteServers", m_settings->value("favoriteServers").toString() + ";" + QString::number(serverId));
-    }
-    m_settings->sync();
-}
-
-bool CliToolConnector::isFavoriteServer(int serverId)
-{
-    return m_settings->value("favoriteServers").toString().split(";").contains(QString::number(serverId));
-}
-
 bool CliToolConnector::isDefaultServer(QString hostname)
 {
     return m_settings->value("defaultHost").toString() == hostname;

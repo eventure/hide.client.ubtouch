@@ -14,7 +14,7 @@ Rectangle {
     property string flag: ""
     property int serverId: -1
 
-    signal clicked()    
+    signal clicked()
 
     color: primary ? "white" : "#DDDDDD"
 
@@ -34,8 +34,9 @@ Rectangle {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                cli.changeFavorite(serverSelectionItemLine.serverId)
-                serverSelectionItemLine.favorite = !serverSelectionItemLine.favorite
+                if(!quickConnectItem.visible) {
+                    serverSelectionModel.changeFavorite(serverSelectionItemLine.serverId)
+                }
             }
         }
     }
@@ -100,7 +101,7 @@ Rectangle {
 
         MouseArea{
             anchors.fill: parent
-            onClicked: serverSelectionItemLine.clicked()
+            onClicked: if(!quickConnectItem.visible) { serverSelectionItemLine.clicked() }
         }
     }
 

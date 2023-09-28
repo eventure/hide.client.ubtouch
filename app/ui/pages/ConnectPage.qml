@@ -107,6 +107,7 @@ Item {
     Connections{
         target: serverSelectionModel
         onServerActivated: {
+            quickConnectItem.favorite = server["stared"]
             quickConnectItem.flag = server["flag"]
             quickConnectItem.serverId = server["serverId"]
             quickConnectItem.hostName = server["hostname"]
