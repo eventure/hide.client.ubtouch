@@ -19,6 +19,11 @@ CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
     , m_connected(false)
     , m_isReady(false)
+#ifdef WITH_CLICK
+    , m_caPath(QCoreApplication::applicationDirPath() + "/CA.pem")
+#else
+    , m_caPath("/usr/share/hideme/CA.pem")
+#endif
 {
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
@@ -29,16 +34,12 @@ CliToolConnector::CliToolConnector(QObject *parent)
         getTokenRequest();
     }
 
-#ifdef WITH_CLICK
-    m_caPath = QCoreApplication::applicationDirPath() + "/CA.pem";
-#else
-    m_caPath = "/usr/share/hideme/CA.pem";
-#endif
-
     QDir dataLocation(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     if(!dataLocation.exists()) {
         dataLocation.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     }
+
+    connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
 }
 
 CliToolConnector::~CliToolConnector()
@@ -89,11 +90,9 @@ void CliToolConnector::getTokenRequest()
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
     QNetworkRequest request = QNetworkRequest(QUrl("https://free.hideservers.net:432/v1.0.0/accessToken"));
     QSslConfiguration sslconf = QSslConfiguration();
-#ifdef WITH_CLICK
-    sslconf.setCaCertificates(QSslCertificate::fromPath(QCoreApplication::applicationDirPath() + "/CA.pem"));
-#else
-    sslconf.setCaCertificates(QSslCertificate::fromPath("/usr/share/hideme/CA.pem"));
-#endif
+
+    sslconf.setCaCertificates(QSslCertificate::fromPath(m_caPath));
+
     request.setSslConfiguration(sslconf);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -159,6 +158,8 @@ void CliToolConnector::logout()
 {
     m_settings->setValue("user", "");
     m_settings->setValue("password", "");
+    m_userName = "";
+    m_password = "";
     m_token = "";
     emit isLoginedChanged();
 }
@@ -253,9 +254,6 @@ void CliToolConnector::getTokenRequestHandler()
     if(reply->error()) {
         qWarning() << reply->errorString();
         emit loginFailed();
-
-        m_settings->setValue("user", "");
-        m_settings->setValue("password", "");
         return;
     }
 

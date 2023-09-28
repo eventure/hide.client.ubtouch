@@ -29,7 +29,6 @@ MainView {
 
     ServerSelectionModel{
         id: serverSelectionModel
-//        onServerActivated: console.log("ACTIVATED >>>> " + server["displayName"] + server["serverId"])
     }
 
     ServiceManager{
