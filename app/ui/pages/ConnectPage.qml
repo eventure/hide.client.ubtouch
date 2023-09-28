@@ -25,7 +25,7 @@ Item {
 
         Text{
             id: setupText
-            text: i18n.tr("Prepare to connection...")
+            text: i18n.tr("PPreparing the connection...")
             color: "#fff"
             font.pixelSize: units.gu(2)
 
