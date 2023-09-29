@@ -274,7 +274,6 @@ void ServiceManager::initServiceSetup()
 #else
     obj["CA"] = "/usr/share/hideme/CA.pem";
 #endif
-    obj["Host"] = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
 
     QJsonObject restObj;
     restObj["Rest"] = obj;

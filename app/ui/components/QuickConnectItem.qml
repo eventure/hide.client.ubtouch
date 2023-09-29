@@ -136,6 +136,8 @@ Item{
 
             onClicked: {
                 cli.setParam("Host", quickConnectItem.hostName)
+                cli.makeDisconnection()
+                cli.makeConnection()
                 quickConnectItem.visible = false
             }
         }

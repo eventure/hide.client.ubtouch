@@ -40,6 +40,8 @@ CliToolConnector::CliToolConnector(QObject *parent)
     }
 
     connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
+
+    loadServiceConfig();
 }
 
 CliToolConnector::~CliToolConnector()
@@ -216,6 +218,7 @@ void CliToolConnector::loadServiceConfigHandler()
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
         QString message = answ["error"].toObject().value("message").toString();

@@ -108,6 +108,7 @@ Rectangle{
                 // go to settings page
                 mainStack.push(Qt.resolvedUrl("../../pages/SetupServicesPage.qml"), {})
             } else if(serviceManager.currentStatus == ServiceManager.STARTED ) {
+                cli.setParam("Host", cli.hostName)
                 cli.makeConnection()
             } else if(serviceManager.currentStatus == ServiceManager.CONNECTED) {
                 cli.makeDisconnection()
