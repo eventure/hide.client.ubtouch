@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "clitoolconnector.h"
 
 #include <QFile>
@@ -19,11 +20,7 @@ CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
     , m_connected(false)
     , m_isReady(false)
-#ifdef WITH_CLICK
-    , m_caPath(QCoreApplication::applicationDirPath() + "/CA.pem")
-#else
-    , m_caPath("/usr/share/hideme/CA.pem")
-#endif
+    , m_caPath(CA_PEM_PATH)
 {
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();

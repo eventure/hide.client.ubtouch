@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "servicemanager.h"
 #include "socektconnector.h"
 
@@ -269,11 +270,7 @@ void ServiceManager::initServiceSetup()
     obj["AccessToken"] = m_accessToken;
     obj["Username"] = m_settings->value("user").toString();
     obj["Password"] = m_settings->value("password").toString();
-#ifdef WITH_CLICK
-    obj["CA"] = QCoreApplication::applicationDirPath() + "/CA.pem";
-#else
-    obj["CA"] = "/usr/share/hideme/CA.pem";
-#endif
+    obj["CA"] = CA_PEM_PATH;
 
     QJsonObject restObj;
     restObj["Rest"] = obj;

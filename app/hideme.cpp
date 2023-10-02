@@ -39,9 +39,6 @@ bool HideMe::setup()
     m_view->setFlags(static_cast<Qt::WindowFlags>(0x00800000));
     m_view->setTitle(tr("Hide me VPN"));
 
-//    ServerSelectionModel *serverSelectionModel = new ServerSelectionModel(this);
-//    m_view->rootContext()->setContextProperty("serverSelectionModel", serverSelectionModel);
-
     m_view->rootContext()->setContextProperty("mApplication", this);
     QUrl source(appDirectory() + "/hide.client.ubtouch.qml");
     m_view->setSource(source);
