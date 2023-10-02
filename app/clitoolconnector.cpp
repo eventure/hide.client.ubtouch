@@ -290,8 +290,9 @@ QString CliToolConnector::hostName() const
 
 void CliToolConnector::setHostName(const QString &newHostName)
 {
-    if (m_hostName == newHostName)
+    if (m_hostName == newHostName || newHostName.isEmpty()) {
         return;
+    }
     m_hostName = newHostName;
     emit hostNameChanged();
 }
