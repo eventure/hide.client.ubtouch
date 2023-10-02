@@ -8,22 +8,20 @@ import "authentication"
 
 MainView {
     id: mainView
-    objectName: "vpnMainView"
+    objectName: "hidemeVPN"
     applicationName: "hide.client.ubtouch"
 
     property bool fullAccessGranted: false
     property string errorTitle;
     property string errorMessage;
 
-    width: parent.width
-    height: parent.height
+    width: units.gu(45)
+    height: units.gu(75)
 
     backgroundColor: "white"
 
     PageStack {
         id: mainStack
-        anchors.fill: parent
-
         Component.onCompleted: initPage();
     }
 

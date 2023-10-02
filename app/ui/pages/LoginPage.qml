@@ -5,12 +5,14 @@ import "../components"
 
 Page {
     id: loginPage
-    anchors.fill: parent
+    anchors {
+        fill: parent
+    }
+    flickable: null
 
     header: PageHeader {
         title: "hide.me VPN"
     }
-
 
     Column {
         id: loginPageColumn

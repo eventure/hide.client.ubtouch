@@ -35,8 +35,7 @@ bool HideMe::setup()
     qmlRegisterType<ServerSelectionModel>("hide.me", 1, 0, "ServerSelectionModel");
     m_view = new QQuickView();
     m_view->setColor(Qt::white);
-    m_view->setResizeMode(QQuickView::SizeViewToRootObject);
-    m_view->setFlags(static_cast<Qt::WindowFlags>(0x00800000));
+    m_view->setResizeMode(QQuickView::SizeRootObjectToView);
     m_view->setTitle(tr("Hide me VPN"));
 
     m_view->rootContext()->setContextProperty("mApplication", this);

@@ -4,11 +4,16 @@ import Lomiri.Components.Popups 1.3
 
 import "../components"
 
-Item {
+Page {
     id: connectionPage
     anchors.fill: parent
 
     property bool isReady: false
+
+    head {  // hide default header
+        locked: true
+        visible: false
+    }
 
     Rectangle{
         id: popOver
