@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "clitoolconnector.h"
 
 #include <QFile>
@@ -19,6 +20,7 @@ CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
     , m_connected(false)
     , m_isReady(false)
+    , m_caPath(CA_PEM_PATH)
 {
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
@@ -29,16 +31,14 @@ CliToolConnector::CliToolConnector(QObject *parent)
         getTokenRequest();
     }
 
-#ifdef WITH_CLICK
-    m_caPath = QCoreApplication::applicationDirPath() + "/CA.pem";
-#else
-    m_caPath = "/usr/share/hideme/CA.pem";
-#endif
-
     QDir dataLocation(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     if(!dataLocation.exists()) {
         dataLocation.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     }
+
+    connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
+
+    loadServiceConfig();
 }
 
 CliToolConnector::~CliToolConnector()
@@ -89,11 +89,9 @@ void CliToolConnector::getTokenRequest()
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
     QNetworkRequest request = QNetworkRequest(QUrl("https://free.hideservers.net:432/v1.0.0/accessToken"));
     QSslConfiguration sslconf = QSslConfiguration();
-#ifdef WITH_CLICK
-    sslconf.setCaCertificates(QSslCertificate::fromPath(QCoreApplication::applicationDirPath() + "/CA.pem"));
-#else
-    sslconf.setCaCertificates(QSslCertificate::fromPath("/usr/share/hideme/CA.pem"));
-#endif
+
+    sslconf.setCaCertificates(QSslCertificate::fromPath(m_caPath));
+
     request.setSslConfiguration(sslconf);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -132,24 +130,6 @@ void CliToolConnector::makeDisconnection()
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::requestHandler);
 }
 
-void CliToolConnector::changeFavorite(int serverId)
-{
-    bool stared = m_settings->value("favoriteServers").toString().split(";").contains(QString::number(serverId));
-    if(stared) {
-        QStringList currSettings = m_settings->value("favoriteServers").toString().split(";");
-        currSettings.removeAll(QString::number(serverId));
-        m_settings->setValue("favoriteServers", currSettings.join(";"));
-    } else {
-        m_settings->setValue("favoriteServers", m_settings->value("favoriteServers").toString() + ";" + QString::number(serverId));
-    }
-    m_settings->sync();
-}
-
-bool CliToolConnector::isFavoriteServer(int serverId)
-{
-    return m_settings->value("favoriteServers").toString().split(";").contains(QString::number(serverId));
-}
-
 bool CliToolConnector::isDefaultServer(QString hostname)
 {
     return m_settings->value("defaultHost").toString() == hostname;
@@ -159,6 +139,8 @@ void CliToolConnector::logout()
 {
     m_settings->setValue("user", "");
     m_settings->setValue("password", "");
+    m_userName = "";
+    m_password = "";
     m_token = "";
     emit isLoginedChanged();
 }
@@ -233,6 +215,7 @@ void CliToolConnector::loadServiceConfigHandler()
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
         QString message = answ["error"].toObject().value("message").toString();
@@ -253,9 +236,6 @@ void CliToolConnector::getTokenRequestHandler()
     if(reply->error()) {
         qWarning() << reply->errorString();
         emit loginFailed();
-
-        m_settings->setValue("user", "");
-        m_settings->setValue("password", "");
         return;
     }
 
@@ -310,8 +290,9 @@ QString CliToolConnector::hostName() const
 
 void CliToolConnector::setHostName(const QString &newHostName)
 {
-    if (m_hostName == newHostName)
+    if (m_hostName == newHostName || newHostName.isEmpty()) {
         return;
+    }
     m_hostName = newHostName;
     emit hostNameChanged();
 }

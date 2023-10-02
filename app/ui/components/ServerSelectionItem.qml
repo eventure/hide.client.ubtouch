@@ -24,16 +24,16 @@ Item {
         anchors.top: serverSelectionItem.top
 
         onClicked: {
-                if(childModel.length > 0) {
-                    if(serverSelectionItem.implicitHeight == units.gu(6)) {
-                        serverSelectionItem.implicitHeight = units.gu(6)*( childModel.length + 1)
-                    } else {
-                        serverSelectionItem.implicitHeight = units.gu(6)
-                    }
+            if(childModel.length > 0) {
+                if(serverSelectionItem.implicitHeight == units.gu(6)) {
+                    serverSelectionItem.implicitHeight = units.gu(6)*( childModel.length + 1)
                 } else {
-                    serverSelectionModel.activate(serverId)
+                    serverSelectionItem.implicitHeight = units.gu(6)
                 }
+            } else {
+                serverSelectionModel.activate(serverId)
             }
+        }
     }
 
     Column {
@@ -48,9 +48,9 @@ Item {
             delegate: ServerSelectionItemLine{
                 primary: false
                 serverId: modelData.serverId
-                favorite: cli.isFavoriteServer(modelData.serverId)
+                favorite: serverSelectionModel.isFavoriteServer(modelData.serverId)
                 countryName: modelData.displayName
-                show10g: modelData.tags.includes("10g")
+                show10g: modelData.tags ? modelData.tags.includes("10g") : false
                 onClicked: {
                     serverSelectionModel.activate(modelData.serverId)
                 }

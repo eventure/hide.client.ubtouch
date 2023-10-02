@@ -4,11 +4,16 @@ import Lomiri.Components.Popups 1.3
 
 import "../components"
 
-Item {
+Page {
     id: connectionPage
     anchors.fill: parent
 
     property bool isReady: false
+
+    head {  // hide default header
+        locked: true
+        visible: false
+    }
 
     Rectangle{
         id: popOver
@@ -25,7 +30,7 @@ Item {
 
         Text{
             id: setupText
-            text: i18n.tr("Prepare to connection...")
+            text: i18n.tr("Preparing the connection...")
             color: "#fff"
             font.pixelSize: units.gu(2)
 
@@ -107,6 +112,7 @@ Item {
     Connections{
         target: serverSelectionModel
         onServerActivated: {
+            quickConnectItem.favorite = server["stared"]
             quickConnectItem.flag = server["flag"]
             quickConnectItem.serverId = server["serverId"]
             quickConnectItem.hostName = server["hostname"]

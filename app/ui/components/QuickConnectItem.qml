@@ -1,13 +1,14 @@
 import QtQuick 2.4
 
 Item{
-    id: popOver
+    id: quickConnectItem
     anchors.fill: parent
     z: 9
 
     property string flag: "ru"
     property int serverId: 0
     property string hostName: ""
+    property bool favorite: false
 
     Rectangle{
         color: "#888888"
@@ -22,7 +23,7 @@ Item{
             }
 
             onClicked: {
-                popOver.visible = false
+                quickConnectItem.visible = false
             }
         }
     }
@@ -63,7 +64,7 @@ Item{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: popOver.visible = false
+                onClicked: quickConnectItem.visible = false
             }
         }
     }
@@ -90,13 +91,21 @@ Item{
 
         Text{
             id: addToFavorites
-            text: qsTr("Add to favorites")
+            text: quickConnectItem.favorite ? qsTr("Remove from favorites") : qsTr("Add to favorites")
             color: "#15749D"
             font.pixelSize: units.gu(2)
             anchors{
                 top: flagImage.bottom
                 topMargin: units.gu(2)
                 horizontalCenter: parent.horizontalCenter
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    serverSelectionModel.changeFavorite(quickConnectItem.serverId)
+                    quickConnectItem.favorite = !quickConnectItem.favorite
+                }
             }
         }
 
@@ -126,8 +135,10 @@ Item{
             }
 
             onClicked: {
-                cli.setParam("Host", popOver.hostName)
-                popOver.visible = false
+                cli.setParam("Host", quickConnectItem.hostName)
+                cli.makeDisconnection()
+                cli.makeConnection()
+                quickConnectItem.visible = false
             }
         }
 

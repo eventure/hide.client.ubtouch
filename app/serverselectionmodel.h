@@ -17,7 +17,7 @@ class ServerSelectionModel : public QAbstractListModel
 public:
     struct Server
     {
-        int id;
+        int serverId;
         QString hostname;
         QString flag;
         QString displayName;
@@ -26,7 +26,7 @@ public:
         QString cityName;
         QString countryCode;
         QString continent;
-        QList<Server> children;
+        QList<Server*> children;
         bool stared;
         bool is10g;
         bool isfree;
@@ -42,6 +42,9 @@ public:
     Q_INVOKABLE QVariantMap get(int serverId);
     Q_INVOKABLE QVariantMap get(QString hostname);
 
+    Q_INVOKABLE void changeFavorite(int serverId);
+    Q_INVOKABLE bool isFavoriteServer(const int serverId) const;
+
 signals:
     void rowCountChanged();
     void dataChanged();
@@ -52,13 +55,14 @@ private slots:
     void resetInternalData();
 
 private:
+    bool setData(const QModelIndex &index, const QVariant &value, int role);
     QHash<int,QByteArray> m_hash;
-    QList<Server> m_serverList;
+    QList<Server*> m_serverList;
 
     QNetworkAccessManager* m_nam;
     QSettings* m_settings;
-    QVariantMap serverToVariantMap(Server s) const;
-    Server jsonObjectToServer(QJsonObject o);
+    QVariantMap serverToVariantMap(Server *s) const;
+    Server* jsonObjectToServer(QJsonObject o);
 };
 
 #endif // SERVERSELECTIONMODEL_H

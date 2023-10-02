@@ -26,6 +26,7 @@ RoundedRectangle{
         horizontalAlignment: Text.AlignLeft
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: passwordTextField.height*0.8
+        inputMethodHints: Qt.ImhNoAutoUppercase
     }
 
     Text {

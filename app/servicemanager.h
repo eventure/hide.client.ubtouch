@@ -9,12 +9,6 @@
 #include <QProcess>
 #include <QSettings>
 
-static const QString s_servicePath = QStringLiteral("/org/freedesktop/systemd1/unit/hideme_2eservice");
-static const QString s_serviceName = QStringLiteral("org.freedesktop.systemd1");
-static const QString s_propertiesIface = QStringLiteral("org.freedesktop.DBus.Properties");
-static const QString s_unitIface = QStringLiteral("org.freedesktop.systemd1.Unit");
-static const QString s_propertyActiveState = QStringLiteral("ActiveState");
-
 class ServiceManager : public QObject
 {
     Q_OBJECT
