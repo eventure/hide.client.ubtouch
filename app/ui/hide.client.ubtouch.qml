@@ -51,6 +51,8 @@ MainView {
             if(mApplication.isLogined) {
                 mainStack.push(Qt.resolvedUrl("pages/ConnectPage.qml"))
             } else {
+                mainStack.clear()
+                cli.makeDisconnection()
                 mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})
             }
         }
