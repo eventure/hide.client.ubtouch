@@ -138,6 +138,7 @@ Item{
                 cli.setParam("Host", quickConnectItem.hostName)
                 cli.makeDisconnection()
                 cli.makeConnection()
+                bottomLineModel.currentIndex = 0
                 quickConnectItem.visible = false
             }
         }
