@@ -93,7 +93,7 @@ Page {
                     text: title
                     active: bottomLineModel.currentIndex == index
                     onClicked: {
-                        if(bottomLineModel.currentIndex != index) {
+                        if(bottomLineModel.currentIndex != index && !quickConnectItem.visible) {
                             bottomLineModel.currentIndex = index
                         }
                     }
