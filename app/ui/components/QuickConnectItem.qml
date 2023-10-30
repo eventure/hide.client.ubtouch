@@ -111,13 +111,20 @@ Item{
 
         Text{
             id: selectDefault
-            text: qsTr("Select default")
+            text: cli.defaultHost == quickConnectItem.hostName ? qsTr("Default host") : qsTr("Select as default")
             color: "#15749D"
             font.pixelSize: units.gu(2)
             anchors{
                 top: addToFavorites.bottom
                 topMargin: units.gu(2)
                 horizontalCenter: parent.horizontalCenter
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    quickConnectItem.visible = false
+                    cli.defaultHostName = quickConnectItem.hostName
+                }
             }
         }
 

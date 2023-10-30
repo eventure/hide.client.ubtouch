@@ -106,6 +106,21 @@ Rectangle {
     }
 
     Image{
+        id: isDefault
+        height: parent.height*0.6
+        width: height
+
+        anchors{
+            verticalCenter: parent.verticalCenter
+            right: is10gImage.left
+            rightMargin: parent.height/2
+        }
+        visible: cli.defaultHostName == hostname
+
+        source: "../../graphics/location_blue.png"
+    }
+
+    Image{
         id: is10gImage
         height: parent.height*0.6
         width: height

@@ -88,6 +88,21 @@ Rectangle{
                 horizontalCenter: parent.horizontalCenter
             }
         }
+
+        Image{
+            id: defaultLocationImage
+            height: locationText.height
+            width: height
+            fillMode: Image.PreserveAspectFit
+            source: "../../../graphics/location_white.png"
+
+            anchors{
+                top: locationText.top
+                right: locationText.left
+                rightMargin: height/2
+            }
+            visible: cli.defaultHostName == cli.hostName
+        }
     }
 
     BigButton{

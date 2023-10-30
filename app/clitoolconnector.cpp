@@ -276,9 +276,11 @@ QString CliToolConnector::defaultHostName() const
 
 void CliToolConnector::setDefaultHostName(const QString &newDefaultHostName)
 {
-    if (m_settings->value("defaultHost").toString() == newDefaultHostName) {
+    if (m_settings->value("defaultHost").toString() == newDefaultHostName || newDefaultHostName.isEmpty()) {
+        qDebug() << newDefaultHostName << "not changed or empty";
         return;
     }
+    qDebug() << "Changed";
     m_settings->setValue("defaultHost",newDefaultHostName);
     emit defaultHostNameChanged();
 }
