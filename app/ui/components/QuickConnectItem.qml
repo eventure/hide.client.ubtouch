@@ -1,4 +1,5 @@
 import QtQuick 2.4
+import hide.me 1.0
 
 Item{
     id: quickConnectItem
@@ -124,6 +125,10 @@ Item{
                 onClicked: {
                     quickConnectItem.visible = false
                     cli.defaultHostName = quickConnectItem.hostName
+                    if(serviceManager.currentStatus != ServiceManager.CONNECTED) {
+                        cli.hostName = quickConnectItem.hostName
+                    }
+                    quickConnectItem.visible = false
                 }
             }
         }
