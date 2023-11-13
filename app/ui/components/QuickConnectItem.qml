@@ -1,4 +1,6 @@
 import QtQuick 2.4
+import Lomiri.Components 1.3
+import Lomiri.Components.Popups 1.3
 import hide.me 1.0
 
 Item{
@@ -10,6 +12,9 @@ Item{
     property int serverId: 0
     property string hostName: ""
     property bool favorite: false
+
+    property string errorTitle;
+    property string errorMessage;
 
     Rectangle{
         color: "#888888"
@@ -123,10 +128,15 @@ Item{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    quickConnectItem.visible = false
-                    cli.defaultHostName = quickConnectItem.hostName
                     if(serviceManager.currentStatus != ServiceManager.CONNECTED) {
                         cli.hostName = quickConnectItem.hostName
+                        cli.defaultHostName = quickConnectItem.hostName
+                    } else {
+                        PopupUtils.open(Qt.resolvedUrl("../dialogs/ErrorDialog.qml"), quickConnectItem,
+                                        {
+                                            title: qsTr("You are connected to our VPN"),
+                                            message: qsTr("Please disconnect to use new default location")
+                                        })
                     }
                     quickConnectItem.visible = false
                 }

@@ -1,9 +1,9 @@
 #include "constants.h"
 #include "servicemanager.h"
 #include "socektconnector.h"
+#include "logging.h"
 
 #include <QFile>
-#include <QDebug>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonObject>
@@ -40,7 +40,7 @@ ServiceManager::ServiceManager(QObject *parent)
     connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
 
     QFile cli(m_program);
-    qDebug() << m_program;
+    Logging::instance()->add(m_program);
     m_cliAvailable = cli.exists();
 
     if (!m_systemDBusConnection.isConnected()) {
@@ -82,7 +82,7 @@ ServiceManager::~ServiceManager()
 
 void ServiceManager::onServiceFileChanged(const QString &path)
 {
-    qDebug() << Q_FUNC_INFO << path;
+    Logging::instance()->add(Q_FUNC_INFO + path);
     ServiceStatus currentStatus;
 
     if(!QFile::exists("/etc/systemd/system/hideme.service")) {
@@ -187,7 +187,7 @@ void ServiceManager::setAccessToken(QString token)
 void ServiceManager::checkServerStatus(QDBusPendingCallWatcher* watcher)
 {
     if(m_currentStatus == ServiceManager::NOT_INSTALLED) {
-        qWarning() << "Service not installed";
+        Logging::instance()->add("Service not installed");
         return;
     }
 
@@ -195,12 +195,12 @@ void ServiceManager::checkServerStatus(QDBusPendingCallWatcher* watcher)
     watcher->deleteLater();
     QDBusPendingReply<QVariant> reply = *watcher;
     if (reply.isError()) {
-        qWarning() << "ERROR" << reply.error().message();
+        Logging::instance()->add("ERROR" + reply.error().message());
         return;
     }
 
     ServiceManager::ServiceStatus newStatus;
-    qDebug() << "Server status is" << reply.value();
+    Logging::instance()->add("Server status is" + reply.value().toString());
 
     if(reply.value() == "active") {
         newStatus = ServiceStatus::STARTED;
@@ -216,10 +216,10 @@ void ServiceManager::checkServerStatus(QDBusPendingCallWatcher* watcher)
 void ServiceManager::installServies()
 {
     if(m_rootPassword.isEmpty()) {
-        qWarning() << "Empty root passrord";
+        Logging::instance()->add("Empty root passrord");
         return;
     }
-    qDebug() << Q_FUNC_INFO;
+    Logging::instance()->add( Q_FUNC_INFO );
 
     /*install services*/
     //FIXME need adapt to nonclick package
@@ -240,10 +240,10 @@ void ServiceManager::installServies()
 void ServiceManager::startServie()
 {
     if(m_rootPassword.isEmpty()) {
-        qWarning() << "Empty root passrord";
+        Logging::instance()->add( "Empty root passrord" );
         return;
     } else {
-        qDebug() << Q_FUNC_INFO << "Service start";
+        Logging::instance()->add( "Service start" );
     }
 
     QProcess *myProcess = new QProcess();

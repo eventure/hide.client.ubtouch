@@ -34,6 +34,7 @@ Rectangle{
         ListElement { type: "group"; name: qsTr("Service"); }
         ListElement { type: "item"; name: qsTr("Setup VPN service"); action: "page"; page: "../../pages/SetupServicesPage.qml" }
         ListElement { type: "group"; name: qsTr("User"); }
+        ListElement { type: "item"; name: qsTr("Store logs"); action: "page"; page: "../../pages/StoreLogsPage.qml" }
         ListElement { type: "item"; name: qsTr("Quit"); action: "script"; doit: "quit"}
         ListElement { type: "item"; name: qsTr("Logout"); action: "script"; doit: "logout"}
         ListElement { type: "group"; name: qsTr("About"); }

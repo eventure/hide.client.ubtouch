@@ -1,9 +1,9 @@
 #include "constants.h"
 #include "clitoolconnector.h"
+#include "logging.h"
 
 #include <QFile>
 #include <QProcess>
-#include <QDebug>
 #include <QStandardPaths>
 #include <QDir>
 #include <QCoreApplication>
@@ -277,10 +277,10 @@ QString CliToolConnector::defaultHostName() const
 void CliToolConnector::setDefaultHostName(const QString &newDefaultHostName)
 {
     if (m_settings->value("defaultHost").toString() == newDefaultHostName || newDefaultHostName.isEmpty()) {
-        qDebug() << newDefaultHostName << "not changed or empty";
+        Logging::instance()->add(newDefaultHostName + "not changed or empty");
         return;
     }
-    qDebug() << "Changed";
+    Logging::instance()->add("Changed");
     m_settings->setValue("defaultHost",newDefaultHostName);
     emit defaultHostNameChanged();
 }

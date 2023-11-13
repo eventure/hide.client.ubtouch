@@ -8,13 +8,17 @@ Dialog {
     property string message;
 
     Label {
+        id: errorTitle
         text: errorDialog.title
+        font.bold: true
     }
 
-    Text {
+    Label {
         id: errorMessage
-        text:  mainView.errorMessage
-
+        text: errorDialog.message
+        width: parent.width
+        clip: true
+        wrapMode: Text.WordWrap
     }
 
     Button {

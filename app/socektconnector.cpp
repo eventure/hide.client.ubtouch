@@ -1,5 +1,6 @@
 #include "socektconnector.h"
 #include "qjsonobject.h"
+#include "logging.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -27,15 +28,14 @@ void SocektConnector::getState()
         }
 
         if(reply->error()) {
-            qWarning() << reply->errorString();
+            Logging::instance()->add(reply->errorString());
         }
 
         QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
         QString code = answ["result"].toObject().value("code").toString();
 
-        qDebug() << "Current state is:" << code;
-
         if(code != m_code) {
+            Logging::instance()->add("Current state is:" + code);
             m_code = code;
             emit codeChanged();
         }

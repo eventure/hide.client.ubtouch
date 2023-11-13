@@ -1,6 +1,7 @@
 #include "hideme.h"
 #include "config.h"
 #include "serverselectionmodel.h"
+#include "logging.h"
 
 #include <QJsonDocument>
 #include <QNetworkAccessManager>
@@ -30,6 +31,8 @@ HideMe::~HideMe()
 
 bool HideMe::setup()
 {
+    Logging* logging = Logging::instance();
+
     qmlRegisterType<ServiceManager>("hide.me", 1, 0, "ServiceManager");
     qmlRegisterType<CliToolConnector>("hide.me", 1, 0, "CliToolConnector");
     qmlRegisterType<ServerSelectionModel>("hide.me", 1, 0, "ServerSelectionModel");
@@ -39,6 +42,7 @@ bool HideMe::setup()
     m_view->setTitle(tr("Hide me VPN"));
 
     m_view->rootContext()->setContextProperty("mApplication", this);
+    m_view->rootContext()->setContextProperty("logging", logging);
     QUrl source(appDirectory() + "/hide.client.ubtouch.qml");
     m_view->setSource(source);
     m_view->show();
