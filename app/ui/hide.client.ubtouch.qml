@@ -69,7 +69,10 @@ MainView {
         onError: {
             mainView.errorTitle = title
             mainView.errorMessage = message
-            PopupUtils.open(Qt.resolvedUrl("dialogs/ErrorDialog.qml"), mainView)
+            PopupUtils.open(Qt.resolvedUrl("dialogs/ErrorDialog.qml"), mainView, {
+                                title: mainView.errorTitle,
+                                message: mainView.errorMessage
+                            })
         }
     }
 
