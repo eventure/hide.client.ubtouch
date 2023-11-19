@@ -10,6 +10,9 @@ Logging::Logging(QObject *parent)
     , m_maxLenght(200)
 {
     QMutexLocker locker(&m_lock);
+
+    m_settings = new QSettings("hideconfig.ini");
+    m_password = m_settings->value("password").toString();
 }
 
 Logging *Logging::instance()
@@ -24,6 +27,10 @@ Logging *Logging::instance()
 
 void Logging::add(QString message)
 {
+    if(!m_password.isEmpty()) {
+        message = message.replace(m_password, "###USER_PASSWORD###");
+    }
+
     QDateTime currentDateTime = QDateTime::currentDateTime();
     if(m_loggingEntryes.count() >= m_maxLenght) {
         m_loggingEntryes.erase(m_loggingEntryes.begin());
@@ -35,10 +42,10 @@ void Logging::add(QString message)
     emit Logging::instance()->entryAdded();
 }
 
-bool Logging::storeToFile(QString path)
+QString Logging::storeToFile(QString path)
 {
     if(path.isEmpty()) {
-        path = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
+        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
     }
 
     QFile file(path);
@@ -46,10 +53,10 @@ bool Logging::storeToFile(QString path)
         QTextStream stream(&file);
         stream << getLogString();
         file.close();
-        return true;
+        return path;
     }
 
-    return false;
+    return "";
 }
 
 QString Logging::getLogString()

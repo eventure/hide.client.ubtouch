@@ -1,6 +1,7 @@
 #include "serverselectionmodel.h"
 #include "qjsonobject.h"
 
+#include "logging.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 
@@ -122,7 +123,7 @@ QVariantMap ServerSelectionModel::get(QString hostname)
             }
         }
     }
-    qWarning() << "Cant find server with nostname " << hostname;
+    Logging::instance()->add("Cant find server with nostname " + hostname);
     return QVariantMap();
 }
 

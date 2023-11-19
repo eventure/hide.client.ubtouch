@@ -32,6 +32,7 @@ HideMe::~HideMe()
 bool HideMe::setup()
 {
     Logging* logging = Logging::instance();
+    logging->add("Application started");
 
     qmlRegisterType<ServiceManager>("hide.me", 1, 0, "ServiceManager");
     qmlRegisterType<CliToolConnector>("hide.me", 1, 0, "CliToolConnector");

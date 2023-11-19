@@ -28,6 +28,7 @@ ServiceManager::ServiceManager(QObject *parent)
     #endif
     , m_currentStatus(ServiceStatus::UNKNOW)
     , m_systemDBusConnection(QDBusConnection::systemBus())
+    , m_serviceInitialized(false)
 {
     m_settings = new QSettings("hideconfig.ini");
 
@@ -48,6 +49,7 @@ ServiceManager::ServiceManager(QObject *parent)
     }
 
     if(!QFile::exists("/etc/systemd/system/hideme.service")) {
+        Logging::instance()->add("Service file not installed");
         m_currentStatus = ServiceStatus::NOT_INSTALLED;
     }
 
@@ -86,8 +88,10 @@ void ServiceManager::onServiceFileChanged(const QString &path)
     ServiceStatus currentStatus;
 
     if(!QFile::exists("/etc/systemd/system/hideme.service")) {
+        Logging::instance()->add("System file not installed");
         currentStatus = ServiceStatus::NOT_INSTALLED;
     } else {
+        Logging::instance()->add("System file installed");
         currentStatus = ServiceStatus::NOT_STARTED;
     }
 
@@ -95,6 +99,8 @@ void ServiceManager::onServiceFileChanged(const QString &path)
         m_currentStatus = currentStatus;
         emit currentStatusChanged();
     }
+
+    emit startOnBootChanged();
 }
 
 void ServiceManager::propertiesChanged(const QString &, const QVariantMap &properties, const QStringList &)
@@ -107,8 +113,10 @@ void ServiceManager::propertiesChanged(const QString &, const QVariantMap &prope
     QString activeStateStr = properties.value(s_propertyActiveState, QString()).toString();
     if(activeStateStr == "active") {
         newStatus = ServiceStatus::STARTED;
+        Logging::instance()->add("Service started");
     } else {
         newStatus = ServiceStatus::NOT_STARTED;
+        Logging::instance()->add("Service not started");
     }
 
     if(newStatus != m_currentStatus) {
@@ -140,6 +148,8 @@ void ServiceManager::socketCodeChangedHandler()
     if(newStatus != m_currentStatus) {
         m_currentStatus = newStatus;
         emit currentStatusChanged();
+
+        Logging::instance()->add("Surrent state is " + state);
     }
 }
 
@@ -148,6 +158,7 @@ void ServiceManager::makeRoute()
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
     QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/route").arg(m_url).arg(m_port)));
     QNetworkReply *reply = mgr->get(request);
+    Logging::instance()->add("Make route");
 }
 
 QString ServiceManager::url() const
@@ -289,12 +300,16 @@ void ServiceManager::initServiceSetupHandler()
         return;
     }
 
-    qDebug() << reply->readAll();
+    Logging::instance()->add("initServiceSetupHandler:" + reply->readAll());
+    if(!m_serviceInitialized) {
+        m_serviceInitialized = true;
+        emit serviceInitializedChanged();
+    }
 }
 
 void ServiceManager::startServiceHandler()
 {
-    qDebug() << m_serviceProcess->readAllStandardOutput();
+    Logging::instance()->add("startServiceHandler:" + m_serviceProcess->readAllStandardOutput());
 }
 
 ServiceManager::ServiceStatus ServiceManager::currentStatus() const
@@ -313,4 +328,37 @@ void ServiceManager::setRootPassword(const QString &newRootPassword)
         return;
     m_rootPassword = newRootPassword;
     emit rootPasswordChanged();
+}
+
+bool ServiceManager::startOnBoot() const
+{
+    return QFile("/etc/systemd/system/user-session.target.wants/hideme.service").exists();
+}
+
+void ServiceManager::setStartOnBoot(bool newStartOnBoot)
+{
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add( "Empty root passrord" );
+        return;
+    }
+
+    QProcess *myProcess = new QProcess();
+    myProcess->start("/bin/bash" , QStringList());
+    if(newStartOnBoot) {
+        myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl enable hideme\n").arg(m_rootPassword).toUtf8());
+        Logging::instance()->add( "Enable start service on boot" );
+    } else {
+        myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl disable hideme\n").arg(m_rootPassword).toUtf8());
+        Logging::instance()->add( "Disable start service on boot" );
+    }
+
+    /*daemons reload*/
+    QProcess *daemoReloadProcess = new QProcess();
+    daemoReloadProcess->start("/bin/bash" , QStringList());
+    daemoReloadProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl daemon-reload\n").arg(m_rootPassword).toUtf8());
+}
+
+bool ServiceManager::serviceInitialized() const
+{
+    return m_serviceInitialized;
 }

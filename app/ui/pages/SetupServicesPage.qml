@@ -42,6 +42,18 @@ Page {
         BigButton{
             width: parent.width
             height: units.gu(5)
+            visible: serviceManager.currentStatus != ServiceManager.NOT_INSTALLED
+            color: serviceManager.startOnBoot ? "#A9E02A" : "#2AA9E0"
+            text: serviceManager.startOnBoot ? qsTr("Disable service on boot") : qsTr("Enable service on boot")
+
+            onClicked:{
+                serviceManager.startOnBoot = !serviceManager.startOnBoot
+            }
+        }
+
+        BigButton{
+            width: parent.width
+            height: units.gu(5)
             enabled: serviceManager.currentStatus != ServiceManager.NOT_INSTALLED
             color: (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? "#2AA9E0" : "#A9E02A"
             text:  (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? qsTr("Start service") : qsTr("Services started")

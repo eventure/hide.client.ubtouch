@@ -1,5 +1,6 @@
 import QtQuick 2.4
 import Lomiri.Components 1.3
+import Lomiri.Components.Popups 1.3
 
 import "../components"
 
@@ -23,10 +24,24 @@ Page {
     Flickable{
         id: logArea
         width: parent.width
-        height: parent.height - storeLogButton.height - units.gu(2)
+        height: parent.height - storeLogButton.height - units.gu(8)
         contentHeight: logText.height
+
         Text {
             id: logText
+            text: logging.getLogString()
+        }
+
+        Text{
+            id: emptyLogText
+            text: qsTr("Logs is empty")
+            anchors.centerIn: parent
+            visible: logText.text.length == 0
+        }
+
+        anchors{
+            bottom: storeLogButton.top
+            bottomMargin: units.gu(2)
         }
     }
 
@@ -42,7 +57,16 @@ Page {
 
         text: qsTr("Store logs")
         onClicked: {
-            logging.storeToFile()
+            var logPath = logging.storeToFile()
+            if( logPath != "") {
+                console.log("WOOOW !!!" + logPath)
+
+                PopupUtils.open(Qt.resolvedUrl("../dialogs/ErrorDialog.qml"), startServicePage,
+                                {
+                                    title: qsTr("Logs saved"),
+                                    message: qsTr("Application log saved to " + logPath)
+                                })
+            }
         }
     }
 }

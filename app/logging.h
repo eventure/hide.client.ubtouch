@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QObject>
+#include <QSettings>
 
 class Logging : public QObject
 {
@@ -17,7 +18,7 @@ public:
     static Logging* instance();
 
     Q_INVOKABLE void add(QString message);
-    Q_INVOKABLE bool storeToFile(QString path = "");
+    Q_INVOKABLE QString storeToFile(QString path = "");
     Q_INVOKABLE QString getLogString();
 
     int maxLenght() const;
@@ -34,6 +35,8 @@ private:
     QMutex m_lock;
     QMap<QDateTime, QString> m_loggingEntryes;
     int m_maxLenght;
+    QSettings* m_settings;
+    QString m_password;
 };
 
 #endif // LOGGING_H

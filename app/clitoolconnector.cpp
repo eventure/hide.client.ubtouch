@@ -27,6 +27,9 @@ CliToolConnector::CliToolConnector(QObject *parent)
     m_password = m_settings->value("password").toString();
     m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
 
+    Logging::instance()->add("User:" + m_userName);
+    Logging::instance()->add("defaultHost:" + m_hostName);
+
     if(!m_userName.isEmpty() && !m_password.isEmpty()) {
         getTokenRequest();
     }
@@ -50,13 +53,15 @@ void CliToolConnector::setLoginPass(const QString usermame, const QString passwo
     if(!usermame.isEmpty() && !password.isEmpty()) {
         m_userName = usermame;
         m_password = password;
+
+        Logging::instance()->add("Login changed to " + m_userName);
     }
 }
 
 void CliToolConnector::setParam(const QString param, const QString value)
 {
     if(param.isEmpty() || value.isEmpty()) {
-        qWarning() << "Empty param or value";
+        Logging::instance()->add("Empty param or value");
         return;
     }
 
@@ -72,6 +77,8 @@ void CliToolConnector::setParam(const QString param, const QString value)
     QString url = m_settings->value("url", "127.0.0.1").toString();
     int port = m_settings->value("port", 5050).toInt();
 
+    Logging::instance()->add("Send configuration: " + data);
+
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
     QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(url).arg(port)));
 
@@ -82,7 +89,7 @@ void CliToolConnector::setParam(const QString param, const QString value)
 void CliToolConnector::getTokenRequest()
 {
     if(m_userName.isEmpty() || m_password.isEmpty()) {
-        qWarning() << "need login first";
+        Logging::instance()->add("need login first");
         return;
     }
 
@@ -102,6 +109,8 @@ void CliToolConnector::getTokenRequest()
     obj["password"] = m_password.simplified().remove(' ');
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
+
+    Logging::instance()->add("Request access token: " + data);
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
@@ -137,6 +146,8 @@ bool CliToolConnector::isDefaultServer(QString hostname)
 
 void CliToolConnector::logout()
 {
+    Logging::instance()->add("Logout");
+
     m_settings->setValue("user", "");
     m_settings->setValue("password", "");
     m_userName = "";
@@ -160,6 +171,9 @@ void CliToolConnector::requestHandler() {
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+
+    Logging::instance()->add("Get from server: " + answ.toJson());
+
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
         QString message = answ["error"].toObject().value("message").toString();
@@ -181,6 +195,8 @@ void CliToolConnector::setParamRequestHandler()
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+    Logging::instance()->add("Get from server: " + answ.toJson());
+
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
         QString message = answ["error"].toObject().value("message").toString();
@@ -215,6 +231,7 @@ void CliToolConnector::loadServiceConfigHandler()
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+    Logging::instance()->add("Set config server answer: " + answ.toJson());
 
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
@@ -240,6 +257,8 @@ void CliToolConnector::getTokenRequestHandler()
     }
 
     QString token = reply->readAll().replace("\"","");
+    Logging::instance()->add("Get token data: " + token);
+
     if(!token.isEmpty() && token != m_token) {
         m_token = token;
 

@@ -32,6 +32,7 @@ void SocektConnector::getState()
         }
 
         QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
+
         QString code = answ["result"].toObject().value("code").toString();
 
         if(code != m_code) {

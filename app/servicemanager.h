@@ -13,6 +13,8 @@ class ServiceManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool cliAvailable READ cliAvailable)
+    Q_PROPERTY(bool startOnBoot READ startOnBoot WRITE setStartOnBoot NOTIFY startOnBootChanged)
+    Q_PROPERTY(bool serviceInitialized READ serviceInitialized NOTIFY serviceInitializedChanged)
     Q_PROPERTY(QString url READ url WRITE setUrl NOTIFY urlChanged)
     Q_PROPERTY(QString rootPassword READ rootPassword WRITE setRootPassword NOTIFY rootPasswordChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
@@ -52,12 +54,21 @@ public:
     QString rootPassword() const;
     void setRootPassword(const QString &newRootPassword);
 
+    bool startOnBoot() const;
+    void setStartOnBoot(bool newStartOnBoot);
+
+    bool serviceInitialized() const;
+
 signals:
     void urlChanged();
     void portChanged();
 
     void currentStatusChanged();
     void rootPasswordChanged();
+
+    void startOnBootChanged();
+
+    void serviceInitializedChanged();
 
 private slots:
     void initServiceSetup();
@@ -85,6 +96,7 @@ private:
     QString m_rootPassword;
     QString m_accessToken;
     SocektConnector* m_connector;
+    bool m_serviceInitialized;
 };
 Q_DECLARE_METATYPE(ServiceManager::ServiceStatus)
 
