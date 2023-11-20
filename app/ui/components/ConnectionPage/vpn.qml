@@ -23,7 +23,7 @@ Rectangle{
             return;
         case ServiceManager.STARTED:
         case ServiceManager.DISCONNECTED:
-            statusImage.source ="../../../graphics/vpn_off.png";
+            statusImage.source = "../../../graphics/vpn_off.png";
             connectButton.text = qsTr("Connect")
             return;
         case ServiceManager.DISCONNECTING:
@@ -123,7 +123,6 @@ Rectangle{
                 // go to settings page
                 mainStack.push(Qt.resolvedUrl("../../pages/SetupServicesPage.qml"), {})
             } else if(serviceManager.currentStatus == ServiceManager.STARTED ) {
-                cli.setParam("Host", cli.hostName)
                 cli.makeConnection()
             } else if(serviceManager.currentStatus == ServiceManager.CONNECTED) {
                 cli.makeDisconnection()

@@ -19,20 +19,18 @@
 CliToolConnector::CliToolConnector(QObject *parent)
     : QObject(parent)
     , m_connected(false)
-    , m_isReady(false)
     , m_caPath(CA_PEM_PATH)
+    , m_isServiceReady(false)
 {
     m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
     m_password = m_settings->value("password").toString();
     m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
+    m_url = m_settings->value("url", "127.0.0.1").toString();
+    m_port = m_settings->value("port", 5050).toInt();
 
     Logging::instance()->add("User:" + m_userName);
     Logging::instance()->add("defaultHost:" + m_hostName);
-
-    if(!m_userName.isEmpty() && !m_password.isEmpty()) {
-        getTokenRequest();
-    }
 
     QDir dataLocation(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     if(!dataLocation.exists()) {
@@ -40,8 +38,7 @@ CliToolConnector::CliToolConnector(QObject *parent)
     }
 
     connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
-
-    loadServiceConfig();
+    connect(this, &CliToolConnector::tokenChanged, this, &CliToolConnector::initServiceSetup);
 }
 
 CliToolConnector::~CliToolConnector()
@@ -65,6 +62,11 @@ void CliToolConnector::setParam(const QString param, const QString value)
         return;
     }
 
+    if(!m_isServiceReady) {
+        Logging::instance()->add("CliToolConnector::setParam: service not ready");
+        return;
+    }
+
     QJsonObject obj;
     obj[param] = value;
 
@@ -74,13 +76,10 @@ void CliToolConnector::setParam(const QString param, const QString value)
     QJsonDocument doc(rest);
     QByteArray data = doc.toJson();
 
-    QString url = m_settings->value("url", "127.0.0.1").toString();
-    int port = m_settings->value("port", 5050).toInt();
-
     Logging::instance()->add("Send configuration: " + data);
 
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(url).arg(port)));
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(m_url).arg(m_port)));
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::setParamRequestHandler);
@@ -90,6 +89,10 @@ void CliToolConnector::getTokenRequest()
 {
     if(m_userName.isEmpty() || m_password.isEmpty()) {
         Logging::instance()->add("need login first");
+        return;
+    }
+
+    if(!m_token.isEmpty()) {
         return;
     }
 
@@ -118,11 +121,13 @@ void CliToolConnector::getTokenRequest()
 
 void CliToolConnector::makeConnection()
 {
-    QString url = m_settings->value("url", "127.0.0.1").toString();
-    int port = m_settings->value("port", 5050).toInt();
+    if(!m_isServiceReady) {
+        Logging::instance()->add("CliToolConnector::makeConnection: service not ready");
+        return;
+    }
 
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/connect").arg(url).arg(port)));
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/connect").arg(m_url).arg(m_port)));
     QNetworkReply *reply = mgr->get(request);
 
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::requestHandler);
@@ -130,13 +135,63 @@ void CliToolConnector::makeConnection()
 
 void CliToolConnector::makeDisconnection()
 {
-    QString url = m_settings->value("url", "127.0.0.1").toString();
-    int port = m_settings->value("port", 5050).toInt();
+    if(!m_isServiceReady) {
+        Logging::instance()->add("CliToolConnector::makeDisconnection: service not ready");
+        return;
+    }
 
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/destroy").arg(url).arg(port)));
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/destroy").arg(m_url).arg(m_port)));
     QNetworkReply *reply = mgr->get(request);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::requestHandler);
+}
+
+void CliToolConnector::makeRoute()
+{
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/route").arg(m_url).arg(m_port)));
+    QNetworkReply *reply = mgr->get(request);
+
+    Logging::instance()->add("Make route");
+    Logging::instance()->add(reply->readAll());
+}
+
+void CliToolConnector::initServiceSetup()
+{
+    if(m_token.isEmpty()) {
+        Logging::instance()->add("CliToolConnector::initServiceSetup: token is empty");
+    }
+
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(m_url).arg(m_port)));
+    request.setRawHeader("Content-Type", "application/json; charset=UTF-8");
+
+    QJsonObject obj;
+    obj["AccessToken"] = m_token;
+    obj["AccessTokenPath"] = "";
+    obj["Username"] = m_settings->value("user").toString();
+    obj["Password"] = m_settings->value("password").toString();
+    obj["Host"]= m_hostName;
+    obj["CA"] = CA_PEM_PATH;
+
+    QJsonObject restObj;
+    restObj["Rest"] = obj;
+
+    QJsonDocument doc(restObj);
+    QByteArray data = doc.toJson();
+
+    QNetworkReply *reply = mgr->post(request, data);
+    connect(reply, &QNetworkReply::finished, this, &CliToolConnector::initServiceSetupHandler);
+}
+
+void CliToolConnector::initServiceSetupHandler()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(!reply) {
+        return;
+    }
+    Logging::instance()->add("initServiceSetupHandler:" + reply->readAll());
+    loadServiceConfig();
 }
 
 bool CliToolConnector::isDefaultServer(QString hostname)
@@ -172,7 +227,7 @@ void CliToolConnector::requestHandler() {
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
 
-    Logging::instance()->add("Get from server: " + answ.toJson());
+    Logging::instance()->add("CliToolConnector::requestHandler : Get from server: " + answ.toJson());
 
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
@@ -195,7 +250,7 @@ void CliToolConnector::setParamRequestHandler()
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
-    Logging::instance()->add("Get from server: " + answ.toJson());
+    Logging::instance()->add("CliToolConnector::setParamRequestHandler : Get from server: " + answ.toJson());
 
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
@@ -209,11 +264,8 @@ void CliToolConnector::setParamRequestHandler()
 
 void CliToolConnector::loadServiceConfig()
 {
-    QString url = m_settings->value("url", "127.0.0.1").toString();
-    int port = m_settings->value("port", 5050).toInt();
-
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(url).arg(port)));
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(m_url).arg(m_port)));
     QNetworkReply *reply = mgr->get(request);
 
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::loadServiceConfigHandler);
@@ -240,6 +292,7 @@ void CliToolConnector::loadServiceConfigHandler()
         emit error(title, message);
     } else {
         setHostName(answ["Rest"].toObject().value("Host").toString());
+        m_isServiceReady = true;
     }
 }
 
@@ -264,8 +317,6 @@ void CliToolConnector::getTokenRequestHandler()
 
         emit tokenChanged();
         loginSuccess();
-        m_isReady = true;
-        emit isReadyChanged();
 
         m_settings->setValue("user", m_userName);
         m_settings->setValue("password", m_password);
@@ -276,11 +327,6 @@ void CliToolConnector::getTokenRequestHandler()
 bool CliToolConnector::isLogined() const
 {
     return (!m_userName.isEmpty() && !m_password.isEmpty());
-}
-
-bool CliToolConnector::isReady() const
-{
-    return m_isReady;
 }
 
 QString CliToolConnector::token() const
@@ -316,4 +362,17 @@ void CliToolConnector::setHostName(const QString &newHostName)
     }
     m_hostName = newHostName;
     emit hostNameChanged();
+}
+
+bool CliToolConnector::isServiceReady() const
+{
+    return m_isServiceReady;
+}
+
+void CliToolConnector::setIsServiceReady(bool newIsServiceReady)
+{
+    if (m_isServiceReady == newIsServiceReady)
+        return;
+    m_isServiceReady = newIsServiceReady;
+    emit isServiceReadyChanged();
 }

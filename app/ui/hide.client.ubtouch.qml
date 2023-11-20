@@ -31,6 +31,16 @@ MainView {
 
     ServiceManager{
         id: serviceManager
+        onCurrentStatusChanged: {
+            if(serviceManager.currentStatus == ServiceManager.STARTED) {
+                cli.initServiceSetup()
+            }
+
+            if(serviceManager.currentStatus == ServiceManager.CONNECTED ||
+                serviceManager.currentStatus == ServiceManager.DISCONNECTED) {
+                cli.makeRoute()
+            }
+        }
     }
 
     CliToolConnector{
@@ -87,7 +97,6 @@ MainView {
             mainStack.push(Qt.resolvedUrl("pages/NoToolsPage.qml"), {})
         } else {
             if(cli.isLogined) {
-                cli.getTokenRequest();
                 mainStack.push(Qt.resolvedUrl("pages/ConnectPage.qml"), {})
             } else {
                 mainStack.push(Qt.resolvedUrl("pages/LoginPage.qml"), {})

@@ -14,10 +14,7 @@ class ServiceManager : public QObject
     Q_OBJECT
     Q_PROPERTY(bool cliAvailable READ cliAvailable)
     Q_PROPERTY(bool startOnBoot READ startOnBoot WRITE setStartOnBoot NOTIFY startOnBootChanged)
-    Q_PROPERTY(bool serviceInitialized READ serviceInitialized NOTIFY serviceInitializedChanged)
-    Q_PROPERTY(QString url READ url WRITE setUrl NOTIFY urlChanged)
     Q_PROPERTY(QString rootPassword READ rootPassword WRITE setRootPassword NOTIFY rootPasswordChanged)
-    Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(ServiceStatus currentStatus READ currentStatus NOTIFY currentStatusChanged)
 
 public:
@@ -36,11 +33,6 @@ public:
     ServiceManager(QObject* parent = nullptr);
     virtual ~ServiceManager();
 
-    QString url() const;
-    void setUrl(const QString &newUrl);
-    int port() const;
-    void setPort(int newPort);
-
     Q_INVOKABLE void installServies();
     Q_INVOKABLE void startServie();
 
@@ -57,23 +49,13 @@ public:
     bool startOnBoot() const;
     void setStartOnBoot(bool newStartOnBoot);
 
-    bool serviceInitialized() const;
-
 signals:
-    void urlChanged();
-    void portChanged();
-
     void currentStatusChanged();
     void rootPasswordChanged();
 
     void startOnBootChanged();
 
-    void serviceInitializedChanged();
-
 private slots:
-    void initServiceSetup();
-    void initServiceSetupHandler();
-
     void startServiceHandler();
 
     void onServiceFileChanged(const QString &path);
@@ -81,14 +63,10 @@ private slots:
     void socketCodeChangedHandler();
 
 private:
-    void makeRoute();
-
     QSettings* m_settings;
     QProcess* m_serviceProcess;
 
     QString m_program;
-    QString m_url;
-    int m_port;
     bool m_cliAvailable;
     bool m_connected;
     ServiceStatus m_currentStatus;
@@ -96,7 +74,6 @@ private:
     QString m_rootPassword;
     QString m_accessToken;
     SocektConnector* m_connector;
-    bool m_serviceInitialized;
 };
 Q_DECLARE_METATYPE(ServiceManager::ServiceStatus)
 

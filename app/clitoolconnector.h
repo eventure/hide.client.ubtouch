@@ -9,7 +9,7 @@ class CliToolConnector : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool isLogined READ isLogined NOTIFY isLoginedChanged)
-    Q_PROPERTY(bool isReady READ isReady NOTIFY isReadyChanged)
+    Q_PROPERTY(bool isServiceReady READ isServiceReady WRITE setIsServiceReady NOTIFY isServiceReadyChanged)
     Q_PROPERTY(QString token READ token NOTIFY tokenChanged)
     Q_PROPERTY(QString defaultHostName READ defaultHostName WRITE setDefaultHostName NOTIFY defaultHostNameChanged)
     Q_PROPERTY(QString hostName READ hostName WRITE setHostName NOTIFY hostNameChanged)
@@ -23,6 +23,8 @@ public:
     Q_INVOKABLE void getTokenRequest();
     Q_INVOKABLE void makeConnection();
     Q_INVOKABLE void makeDisconnection();
+    Q_INVOKABLE void makeRoute();
+    Q_INVOKABLE void initServiceSetup();
     Q_INVOKABLE bool isDefaultServer(QString hostname);
     Q_INVOKABLE void logout();
     Q_INVOKABLE void quit();
@@ -31,7 +33,6 @@ public:
     Q_INVOKABLE QString getDebugOut() {return m_debugOutput.join("\n");}
 
     bool isLogined() const;
-    bool isReady() const;
 
     QString token() const;
 
@@ -41,6 +42,9 @@ public:
     QString hostName() const;
     void setHostName(const QString &newHostName);
 
+    bool isServiceReady() const;
+    void setIsServiceReady(bool newIsServiceReady);
+
 private slots:
     void getTokenRequestHandler();
     void requestHandler();
@@ -49,13 +53,14 @@ private slots:
     void loadServiceConfig();
     void loadServiceConfigHandler();
 
+    void initServiceSetupHandler();
+
 signals:
     void loginFailed();
     void loginSuccess();
 
     void connectedChanged();
     void isLoginedChanged();
-    void isReadyChanged();
 
     void urlChanged();
     void portChanged();
@@ -67,6 +72,8 @@ signals:
 
     void hostNameChanged();
 
+    void isServiceReadyChanged();
+
 private:
     QString m_caPath;
     QStringList m_debugOutput;
@@ -77,9 +84,12 @@ private:
     QString m_userName;
     QString m_password;
     bool m_connected;
-    bool m_isReady;
     QString m_token;
     QString m_hostName;
+    bool m_isServiceReady;
+
+    QString m_url;
+    int m_port;
 };
 
 #endif // CLITOOLCONNECTOR_H

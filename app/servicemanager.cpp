@@ -28,16 +28,12 @@ ServiceManager::ServiceManager(QObject *parent)
     #endif
     , m_currentStatus(ServiceStatus::UNKNOW)
     , m_systemDBusConnection(QDBusConnection::systemBus())
-    , m_serviceInitialized(false)
 {
     m_settings = new QSettings("hideconfig.ini");
-
-    m_url = m_settings->value("url", "127.0.0.1").toString();
-    m_port = m_settings->value("port", 5050).toInt();
-
     m_serviceProcess = new QProcess(this);
 
-    m_connector = new SocektConnector(m_url, m_port, this);
+    m_connector = new SocektConnector(m_settings->value("url", "127.0.0.1").toString()
+                                    , m_settings->value("port", 5050).toInt() , this);
     connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
 
     QFile cli(m_program);
@@ -74,8 +70,6 @@ ServiceManager::ServiceManager(QObject *parent)
     QFileSystemWatcher *serviceWatcher = new QFileSystemWatcher();
     serviceWatcher->addPath("/etc/systemd/system/");
     connect(serviceWatcher, &QFileSystemWatcher::directoryChanged, this, &ServiceManager::onServiceFileChanged);
-
-    connect(this, &ServiceManager::currentStatusChanged, this, &ServiceManager::initServiceSetup);
 }
 
 ServiceManager::~ServiceManager()
@@ -136,7 +130,6 @@ void ServiceManager::socketCodeChangedHandler()
 
     if(state == "routed") {
         newStatus = ServiceStatus::CONNECTING;
-        makeRoute();
     } else if (state == "clean") {
         newStatus = ServiceStatus::STARTED;
     } else if (state == "connecting") {
@@ -153,45 +146,10 @@ void ServiceManager::socketCodeChangedHandler()
     }
 }
 
-void ServiceManager::makeRoute()
-{
-    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/route").arg(m_url).arg(m_port)));
-    QNetworkReply *reply = mgr->get(request);
-    Logging::instance()->add("Make route");
-}
-
-QString ServiceManager::url() const
-{
-    return m_url;
-}
-
-void ServiceManager::setUrl(const QString &newUrl)
-{
-    if (m_url == newUrl)
-        return;
-    m_url = newUrl;
-    emit urlChanged();
-}
-
-int ServiceManager::port() const
-{
-    return m_port;
-}
-
-void ServiceManager::setPort(int newPort)
-{
-    if (m_port == newPort)
-        return;
-    m_port = newPort;
-    emit portChanged();
-}
-
 void ServiceManager::setAccessToken(QString token)
 {
     if(!token.isEmpty() != m_accessToken) {
         m_accessToken = token;
-        initServiceSetup();
     }
 }
 
@@ -267,46 +225,6 @@ bool ServiceManager::cliAvailable() const
     return m_cliAvailable;
 }
 
-void ServiceManager::initServiceSetup()
-{
-    if(m_currentStatus != ServiceStatus::STARTED || m_accessToken.isEmpty()) {
-        return;
-    }
-
-    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
-    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/configuration").arg(m_url).arg(m_port)));
-    request.setRawHeader("Content-Type", "application/json; charset=UTF-8");
-
-    QJsonObject obj;
-    obj["AccessToken"] = m_accessToken;
-    obj["Username"] = m_settings->value("user").toString();
-    obj["Password"] = m_settings->value("password").toString();
-    obj["CA"] = CA_PEM_PATH;
-
-    QJsonObject restObj;
-    restObj["Rest"] = obj;
-
-    QJsonDocument doc(restObj);
-    QByteArray data = doc.toJson();
-
-    QNetworkReply *reply = mgr->post(request, data);
-    connect(reply, &QNetworkReply::finished, this, &ServiceManager::initServiceSetupHandler);
-}
-
-void ServiceManager::initServiceSetupHandler()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
-    if(!reply) {
-        return;
-    }
-
-    Logging::instance()->add("initServiceSetupHandler:" + reply->readAll());
-    if(!m_serviceInitialized) {
-        m_serviceInitialized = true;
-        emit serviceInitializedChanged();
-    }
-}
-
 void ServiceManager::startServiceHandler()
 {
     Logging::instance()->add("startServiceHandler:" + m_serviceProcess->readAllStandardOutput());
@@ -356,9 +274,4 @@ void ServiceManager::setStartOnBoot(bool newStartOnBoot)
     QProcess *daemoReloadProcess = new QProcess();
     daemoReloadProcess->start("/bin/bash" , QStringList());
     daemoReloadProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl daemon-reload\n").arg(m_rootPassword).toUtf8());
-}
-
-bool ServiceManager::serviceInitialized() const
-{
-    return m_serviceInitialized;
 }

@@ -25,7 +25,7 @@ Page {
         ActivityIndicator {
             id: loading
             anchors.centerIn: parent
-            running: !cli.isReady
+            running: !cli.token != ""
         }
 
         Text{
@@ -119,4 +119,6 @@ Page {
             quickConnectItem.visible = true
         }
     }
+
+    Component.onCompleted: cli.getTokenRequest()
 }
