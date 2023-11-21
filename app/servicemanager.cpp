@@ -142,7 +142,7 @@ void ServiceManager::socketCodeChangedHandler()
         m_currentStatus = newStatus;
         emit currentStatusChanged();
 
-        Logging::instance()->add("Surrent state is " + state);
+        Logging::instance()->add("Current state is " + state);
     }
 }
 

@@ -73,6 +73,7 @@ signals:
     void hostNameChanged();
 
     void isServiceReadyChanged();
+    void setupServiceFail();
 
 private:
     QString m_caPath;

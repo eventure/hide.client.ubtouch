@@ -84,12 +84,21 @@ MainView {
                                 message: mainView.errorMessage
                             })
         }
+        onSetupServiceFail: {
+            initServiceTimer.start()
+        }
     }
 
     Timer {
         id: timoutTimer
         interval: 5000;
         onTriggered: PopupUtils.open(Qt.resolvedUrl("dialogs/TimeOutDialog.qml"), mainView)
+    }
+
+    Timer{
+        id: initServiceTimer
+        interval: 1000
+        onTriggered: cli.initServiceSetup()
     }
 
     function initPage() {

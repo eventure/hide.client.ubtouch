@@ -157,9 +157,11 @@ Item{
             }
 
             onClicked: {
-                cli.setParam("Host", quickConnectItem.hostName)
+                cli.hostName = quickConnectItem.hostName
+
                 cli.makeDisconnection()
                 cli.makeConnection()
+
                 bottomLineModel.currentIndex = 0
                 quickConnectItem.visible = false
             }

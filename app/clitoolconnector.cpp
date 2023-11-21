@@ -38,7 +38,8 @@ CliToolConnector::CliToolConnector(QObject *parent)
     }
 
     connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
-    connect(this, &CliToolConnector::tokenChanged, this, &CliToolConnector::initServiceSetup);
+    //connect(this, &CliToolConnector::tokenChanged, this, &CliToolConnector::initServiceSetup);
+    connect(this, &CliToolConnector::hostNameChanged, this, &CliToolConnector::initServiceSetup);
 }
 
 CliToolConnector::~CliToolConnector()
@@ -190,8 +191,14 @@ void CliToolConnector::initServiceSetupHandler()
     if(!reply) {
         return;
     }
-    Logging::instance()->add("initServiceSetupHandler:" + reply->readAll());
-    loadServiceConfig();
+
+    if(reply->error()) {
+        Logging::instance()->add("CliToolConnector::initServiceSetupHandler: " + reply->errorString());
+        emit setupServiceFail();
+    } else {
+        Logging::instance()->add("initServiceSetupHandler:" + reply->readAll());
+        loadServiceConfig();
+    }
 }
 
 bool CliToolConnector::isDefaultServer(QString hostname)
@@ -293,6 +300,7 @@ void CliToolConnector::loadServiceConfigHandler()
     } else {
         setHostName(answ["Rest"].toObject().value("Host").toString());
         m_isServiceReady = true;
+        emit isServiceReadyChanged();
     }
 }
 

@@ -24,7 +24,7 @@ Rectangle{
         case ServiceManager.STARTED:
         case ServiceManager.DISCONNECTED:
             statusImage.source = "../../../graphics/vpn_off.png";
-            connectButton.text = qsTr("Connect")
+            connectButton.text = cli.isServiceReady ? qsTr("Connect") : qsTr("Waiting service setup...")
             return;
         case ServiceManager.DISCONNECTING:
             statusImage.source = "../../../graphics/vpn_inprogress.png";
@@ -57,6 +57,7 @@ Rectangle{
     Connections{
         target: cli
         onHostNameChanged: locationText.text = serverSelectionModel.get(cli.hostName)["displayName"]
+        onIsServiceReadyChanged: calculateStatusProp()
     }
 
     Item{
