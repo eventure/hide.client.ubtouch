@@ -114,7 +114,7 @@ void CliToolConnector::getTokenRequest()
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
 
-    Logging::instance()->add("Request access token: " + data);
+    Logging::instance()->add("Request access token: " + data.replace(obj["password"].toString(), "###USER_PASSWORD###"));
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
