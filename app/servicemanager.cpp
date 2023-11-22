@@ -250,7 +250,7 @@ void ServiceManager::setRootPassword(const QString &newRootPassword)
 
 bool ServiceManager::startOnBoot() const
 {
-    return QFile("/etc/systemd/system/user-session.target.wants/hideme.service").exists();
+    return QFile("/etc/systemd/system/graphical.target.wants/hideme.service").exists();
 }
 
 void ServiceManager::setStartOnBoot(bool newStartOnBoot)
@@ -269,6 +269,7 @@ void ServiceManager::setStartOnBoot(bool newStartOnBoot)
         myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl disable hideme\n").arg(m_rootPassword).toUtf8());
         Logging::instance()->add( "Disable start service on boot" );
     }
+    emit startOnBootChanged();
 
     /*daemons reload*/
     QProcess *daemoReloadProcess = new QProcess();

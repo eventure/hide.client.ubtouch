@@ -114,7 +114,7 @@ void CliToolConnector::getTokenRequest()
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
 
-    Logging::instance()->add("Request access token: " + data.replace(obj["password"].toString(), "###USER_PASSWORD###"));
+//    Logging::instance()->add("Request access token: " + data.replace(m_password.simplified().remove(' '), "###USER_PASSWORD###"));
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
@@ -216,6 +216,8 @@ void CliToolConnector::logout()
     m_password = "";
     m_token = "";
     emit isLoginedChanged();
+    m_forceInit = true;
+    initServiceSetup();
 }
 
 void CliToolConnector::quit()
@@ -312,7 +314,7 @@ void CliToolConnector::getTokenRequestHandler()
     }
 
     if(reply->error()) {
-        qWarning() << reply->errorString();
+        Logging::instance()->add("CliToolConnector::getTokenRequestHandler: " + reply->errorString());
         emit loginFailed();
         return;
     }

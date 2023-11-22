@@ -40,14 +40,23 @@ Page {
         }
 
         BigButton{
+            id: startOnBootButton
+            property bool startOnBoot: serviceManager.startOnBoot
             width: parent.width
             height: units.gu(5)
             visible: serviceManager.currentStatus != ServiceManager.NOT_INSTALLED
-            color: serviceManager.startOnBoot ? "#A9E02A" : "#2AA9E0"
-            text: serviceManager.startOnBoot ? qsTr("Disable service on boot") : qsTr("Enable service on boot")
+            color: startOnBootButton.startOnBoot ? "#A9E02A" : "#2AA9E0"
+            text: startOnBootButton.startOnBoot ? qsTr("Disable service on boot") : qsTr("Enable service on boot")
 
             onClicked:{
                 serviceManager.startOnBoot = !serviceManager.startOnBoot
+            }
+            /*We need timer because QFileSystemWatch not watched on symlink*/
+            Timer{
+                interval: 500
+                running: true
+                repeat: true
+                onTriggered: startOnBootButton.startOnBoot = serviceManager.startOnBoot
             }
         }
 
