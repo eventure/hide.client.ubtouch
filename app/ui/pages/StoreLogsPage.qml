@@ -55,12 +55,10 @@ Page {
             bottomMargin: units.gu(2)
         }
 
-        text: qsTr("Store logs")
+        text: qsTr("Save log file")
         onClicked: {
             var logPath = logging.storeToFile()
             if( logPath != "") {
-                console.log("WOOOW !!!" + logPath)
-
                 PopupUtils.open(Qt.resolvedUrl("../dialogs/ErrorDialog.qml"), startServicePage,
                                 {
                                     title: qsTr("Logs saved"),
