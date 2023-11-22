@@ -216,7 +216,6 @@ void CliToolConnector::logout()
     m_password = "";
     m_token = "";
     emit isLoginedChanged();
-    m_forceInit = true;
     initServiceSetup();
 }
 
