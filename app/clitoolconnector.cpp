@@ -215,8 +215,12 @@ void CliToolConnector::logout()
     m_userName = "";
     m_password = "";
     m_token = "";
+
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/token").arg(m_url).arg(m_port)));
+    mgr->deleteResource(request);
+
     emit isLoginedChanged();
-    initServiceSetup();
 }
 
 void CliToolConnector::quit()
