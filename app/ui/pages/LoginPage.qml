@@ -65,7 +65,12 @@ Page {
             id: loginButton
             width: parent.width
             text: qsTr("Login")
+            enabled: usernameField.text.length != 0 && passwordField.text.length != 0
             onClicked: {
+                if(usernameField.text.length == 0 || passwordField.text.length == 0) {
+                    return
+                }
+
                 timoutTimer.start();
                 loading.running = true
                 cli.setLoginPass(usernameField.text, passwordField.text)
