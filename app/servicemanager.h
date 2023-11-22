@@ -63,6 +63,8 @@ private slots:
     void socketCodeChangedHandler();
 
 private:
+    QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm);
+
     QSettings* m_settings;
     QProcess* m_serviceProcess;
 

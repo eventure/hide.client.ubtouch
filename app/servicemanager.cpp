@@ -246,6 +246,24 @@ void ServiceManager::setRootPassword(const QString &newRootPassword)
         return;
     m_rootPassword = newRootPassword;
     emit rootPasswordChanged();
+
+/*Check and update service file*/
+    if(QFile::exists("/etc/systemd/system/hideme.service")) {
+        QByteArray systemServiceHash = fileChecksum("/etc/systemd/system/hideme.service", QCryptographicHash::Md5);
+        QByteArray applicationServiceHash = fileChecksum(
+#ifdef WITH_CLICK
+                    "/opt/click.ubuntu.com/hideme.ubports/current/hideme.service"
+#else
+                    "/usr/share/hideme/hideme.service"
+#endif
+                    , QCryptographicHash::Md5);
+
+
+        if(systemServiceHash != applicationServiceHash) {
+            Logging::instance()->add("service file outdated. updating service file");
+            installServies();
+        }
+    }
 }
 
 bool ServiceManager::startOnBoot() const
@@ -275,4 +293,17 @@ void ServiceManager::setStartOnBoot(bool newStartOnBoot)
     QProcess *daemoReloadProcess = new QProcess();
     daemoReloadProcess->start("/bin/bash" , QStringList());
     daemoReloadProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl daemon-reload\n").arg(m_rootPassword).toUtf8());
+}
+
+QByteArray ServiceManager::fileChecksum(const QString &fileName,
+                        QCryptographicHash::Algorithm hashAlgorithm)
+{
+    QFile f(fileName);
+    if (f.open(QFile::ReadOnly)) {
+        QCryptographicHash hash(hashAlgorithm);
+        if (hash.addData(&f)) {
+            return hash.result();
+        }
+    }
+    return QByteArray();
 }
