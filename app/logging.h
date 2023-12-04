@@ -5,7 +5,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QObject>
-#include <QSettings>
+#include "settings.h"
 
 class Logging : public QObject
 {
@@ -35,7 +35,7 @@ private:
     QMutex m_lock;
     QMap<QDateTime, QString> m_loggingEntryes;
     int m_maxLenght;
-    QSettings* m_settings;
+    Settings* m_settings;
     QString m_password;
 };
 

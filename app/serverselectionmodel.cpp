@@ -27,7 +27,7 @@ ServerSelectionModel::ServerSelectionModel(QObject *parent)
     connect(m_nam, &QNetworkAccessManager::finished, this, &ServerSelectionModel::parsePassepartoutHandler);
     m_nam->get(QNetworkRequest(QUrl(API_URL)));
 
-    m_settings = new QSettings("hideconfig.ini");
+    m_settings = new Settings("hideconfig.ini");
 }
 
 QVariant ServerSelectionModel::data(const QModelIndex &index, int role) const

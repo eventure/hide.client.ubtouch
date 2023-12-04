@@ -7,7 +7,7 @@
 #include <QDBusPendingCallWatcher>
 #include <QObject>
 #include <QProcess>
-#include <QSettings>
+#include "settings.h"
 
 class ServiceManager : public QObject
 {
@@ -65,7 +65,7 @@ private slots:
 private:
     QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm);
 
-    QSettings* m_settings;
+    Settings* m_settings;
     QProcess* m_serviceProcess;
 
     QString m_program;

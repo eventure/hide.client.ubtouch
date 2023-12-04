@@ -14,6 +14,8 @@ set(SRC
     hideme.h
     socektconnector.cpp
     socektconnector.h
+    settings.cpp
+    settings.h
     servicemanager.cpp
     servicemanager.h
     serverselectionmodel.cpp

@@ -29,7 +29,6 @@ ServiceManager::ServiceManager(QObject *parent)
     , m_currentStatus(ServiceStatus::UNKNOW)
     , m_systemDBusConnection(QDBusConnection::systemBus())
 {
-    m_settings = new QSettings("hideconfig.ini");
     m_serviceProcess = new QProcess(this);
 
     m_connector = new SocektConnector(m_settings->value("url", "127.0.0.1").toString()
