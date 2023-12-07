@@ -21,8 +21,8 @@ CliToolConnector::CliToolConnector(QObject *parent)
     , m_connected(false)
     , m_caPath(CA_PEM_PATH)
     , m_isServiceReady(false)
+    , m_settings(new Settings("hideconfig.ini"))
 {
-    m_settings = new Settings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
     m_password = m_settings->value("password").toString();
     m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();

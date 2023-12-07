@@ -26,6 +26,7 @@ ServiceManager::ServiceManager(QObject *parent)
     #else
     , m_program("/usr/bin/hide.me")
     #endif
+    , m_settings(new Settings("hideconfig.ini"))
     , m_currentStatus(ServiceStatus::UNKNOW)
     , m_systemDBusConnection(QDBusConnection::systemBus())
 {

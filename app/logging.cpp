@@ -8,10 +8,10 @@ static Logging* loggingInstance = 0;
 Logging::Logging(QObject *parent)
     : QObject{parent}
     , m_maxLenght(200)
+    , m_settings(new Settings("hideconfig.ini"))
 {
     QMutexLocker locker(&m_lock);
 
-    m_settings = new Settings("hideconfig.ini");
     m_password = m_settings->value("password").toString();
 
     connect(m_settings
