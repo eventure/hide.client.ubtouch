@@ -48,7 +48,6 @@ CliToolConnector::CliToolConnector(QObject *parent)
     }
 
     connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
-    //connect(this, &CliToolConnector::tokenChanged, this, &CliToolConnector::initServiceSetup);
     connect(this, &CliToolConnector::hostNameChanged, this, &CliToolConnector::initServiceSetup);
 }
 
@@ -63,6 +62,8 @@ void CliToolConnector::setLoginPass(const QString usermame, const QString passwo
         m_password = password;
 
         Logging::instance()->add("Login changed to " + m_userName);
+
+        initServiceSetup();
     }
 }
 
@@ -343,7 +344,7 @@ void CliToolConnector::getTokenRequestHandler()
 
         m_settings->setValue("user", m_userName);
         m_settings->setValue("password", m_password);
-
+        m_settings->sync();
     }
 }
 

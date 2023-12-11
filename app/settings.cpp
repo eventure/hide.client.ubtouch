@@ -1,7 +1,8 @@
 #include "settings.h"
+#include <QStandardPaths>
 
 Settings::Settings(const QString &fileName, Format format, QSettings *parent)
-    : QSettings{fileName, format, parent}
+    : QSettings{ QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + fileName, format, parent}
 {
     QFileSystemWatcher* settingsFileWatcher = new QFileSystemWatcher(this);
     settingsFileWatcher->addPath(this->fileName());
