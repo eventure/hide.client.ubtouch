@@ -8,6 +8,7 @@
 ServerSelectionModel::ServerSelectionModel(QObject *parent)
     : QAbstractListModel(parent)
     , m_nam(new QNetworkAccessManager(this))
+    , m_settings(new Settings("hideconfig.ini"))
 {
     m_hash.insert(Qt::UserRole ,QByteArray("serverIdenty"));
     m_hash.insert(Qt::UserRole+1 ,QByteArray("hostname"));
@@ -26,8 +27,6 @@ ServerSelectionModel::ServerSelectionModel(QObject *parent)
 
     connect(m_nam, &QNetworkAccessManager::finished, this, &ServerSelectionModel::parsePassepartoutHandler);
     m_nam->get(QNetworkRequest(QUrl(API_URL)));
-
-    m_settings = new QSettings("hideconfig.ini");
 }
 
 QVariant ServerSelectionModel::data(const QModelIndex &index, int role) const

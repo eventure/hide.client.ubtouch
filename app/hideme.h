@@ -3,7 +3,6 @@
 
 #include <QApplication>
 #include <QQuickView>
-#include <QSettings>
 
 #include "clitoolconnector.h"
 #include "servicemanager.h"

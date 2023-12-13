@@ -7,7 +7,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QQmlContext>
-#include <QSettings>
 #include <QStandardPaths>
 #include <QQmlEngine>
 

@@ -21,11 +21,21 @@ CliToolConnector::CliToolConnector(QObject *parent)
     , m_connected(false)
     , m_caPath(CA_PEM_PATH)
     , m_isServiceReady(false)
+    , m_settings(new Settings("hideconfig.ini"))
 {
-    m_settings = new QSettings("hideconfig.ini");
     m_userName = m_settings->value("user").toString();
     m_password = m_settings->value("password").toString();
     m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
+
+    connect(m_settings
+            , &Settings::settingsUpdated
+            , this
+            , [=] {
+        m_userName = m_settings->value("user").toString();
+        m_password = m_settings->value("password").toString();
+        m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
+    });
+
     m_url = m_settings->value("url", "127.0.0.1").toString();
     m_port = m_settings->value("port", 5050).toInt();
 
@@ -38,7 +48,6 @@ CliToolConnector::CliToolConnector(QObject *parent)
     }
 
     connect(this, &CliToolConnector::loginFailed, this, &CliToolConnector::logout);
-    //connect(this, &CliToolConnector::tokenChanged, this, &CliToolConnector::initServiceSetup);
     connect(this, &CliToolConnector::hostNameChanged, this, &CliToolConnector::initServiceSetup);
 }
 
@@ -53,6 +62,8 @@ void CliToolConnector::setLoginPass(const QString usermame, const QString passwo
         m_password = password;
 
         Logging::instance()->add("Login changed to " + m_userName);
+
+        initServiceSetup();
     }
 }
 
@@ -333,7 +344,7 @@ void CliToolConnector::getTokenRequestHandler()
 
         m_settings->setValue("user", m_userName);
         m_settings->setValue("password", m_password);
-
+        m_settings->sync();
     }
 }
 

@@ -5,7 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QObject>
-#include <QSettings>
+#include "settings.h"
 
 static const QString API_URL = "https://api.hide.me/v1/external/passepartout";
 
@@ -60,7 +60,7 @@ private:
     QList<Server*> m_serverList;
 
     QNetworkAccessManager* m_nam;
-    QSettings* m_settings;
+    Settings* m_settings;
     QVariantMap serverToVariantMap(Server *s) const;
     Server* jsonObjectToServer(QJsonObject o);
 };

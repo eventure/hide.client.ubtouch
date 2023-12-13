@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QProcess>
-#include <QSettings>
-
+#include "settings.h"
 class CliToolConnector : public QObject
 {
     Q_OBJECT
@@ -80,7 +79,7 @@ private:
     QStringList m_debugOutput;
     QString m_errorMessage;
 
-    QSettings* m_settings;
+    Settings* m_settings;
 
     QString m_userName;
     QString m_password;
