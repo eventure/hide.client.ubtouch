@@ -346,6 +346,7 @@ void CliToolConnector::getTokenRequestHandler()
         m_settings->setValue("password", m_password);
         m_settings->sync();
     }
+    initServiceSetup();
 }
 
 bool CliToolConnector::isLogined() const

@@ -37,7 +37,6 @@ public:
     Q_INVOKABLE void startServie();
     Q_INVOKABLE void stopServie();
 
-    Q_INVOKABLE void setAccessToken(QString token);
     void checkServerStatus(QDBusPendingCallWatcher* watcher);
 
     bool cliAvailable() const;
@@ -75,7 +74,6 @@ private:
     ServiceStatus m_currentStatus;
     QDBusConnection m_systemDBusConnection;
     QString m_rootPassword;
-    QString m_accessToken;
     SocektConnector* m_connector;
 };
 Q_DECLARE_METATYPE(ServiceManager::ServiceStatus)

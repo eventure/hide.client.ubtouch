@@ -146,13 +146,6 @@ void ServiceManager::socketCodeChangedHandler()
     }
 }
 
-void ServiceManager::setAccessToken(QString token)
-{
-    if(!token.isEmpty() != m_accessToken) {
-        m_accessToken = token;
-    }
-}
-
 void ServiceManager::checkServerStatus(QDBusPendingCallWatcher* watcher)
 {
     if(m_currentStatus == ServiceManager::NOT_INSTALLED) {
