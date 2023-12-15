@@ -220,6 +220,20 @@ void ServiceManager::startServie()
     myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl restart hideme\n").arg(m_rootPassword).toUtf8());
 }
 
+void ServiceManager::stopServie()
+{
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add( "Empty root passrord" );
+        return;
+    } else {
+        Logging::instance()->add( "Service stop" );
+    }
+
+    QProcess *myProcess = new QProcess();
+    myProcess->start("/bin/bash" , QStringList());
+    myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl stop hideme\n").arg(m_rootPassword).toUtf8());
+}
+
 bool ServiceManager::cliAvailable() const
 {
     return m_cliAvailable;

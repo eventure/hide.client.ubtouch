@@ -65,11 +65,13 @@ Page {
             height: units.gu(5)
             enabled: serviceManager.currentStatus != ServiceManager.NOT_INSTALLED
             color: (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? "#2AA9E0" : "#A9E02A"
-            text:  (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? qsTr("Start service") : qsTr("Services started")
+            text:  (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? qsTr("Start service") : qsTr("Stop service")
 
             onClicked: if(serviceManager.currentStatus == ServiceManager.NOT_STARTED ) {
                            console.log("Do start!")
                            serviceManager.startServie()
+                       } else {
+                           serviceManager.stopServie()
                        }
         }
 

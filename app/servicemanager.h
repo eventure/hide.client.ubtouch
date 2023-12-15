@@ -35,6 +35,7 @@ public:
 
     Q_INVOKABLE void installServies();
     Q_INVOKABLE void startServie();
+    Q_INVOKABLE void stopServie();
 
     Q_INVOKABLE void setAccessToken(QString token);
     void checkServerStatus(QDBusPendingCallWatcher* watcher);
