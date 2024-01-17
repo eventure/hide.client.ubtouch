@@ -31,9 +31,11 @@ CliToolConnector::CliToolConnector(QObject *parent)
             , &Settings::settingsUpdated
             , this
             , [=] {
+
         m_userName = m_settings->value("user").toString();
         m_password = m_settings->value("password").toString();
         m_hostName = m_settings->value("defaultHost", "free-nl-v4.hideservers.net").toString();
+        isLogined();
     });
 
     m_url = m_settings->value("url", "127.0.0.1").toString();
@@ -125,8 +127,6 @@ void CliToolConnector::getTokenRequest()
     QJsonDocument doc(obj);
     QByteArray data = doc.toJson();
 
-//    Logging::instance()->add("Request access token: " + data.replace(m_password.simplified().remove(' '), "###USER_PASSWORD###"));
-
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
 }
@@ -202,6 +202,7 @@ void CliToolConnector::initServiceSetupHandler()
     if(!reply) {
         return;
     }
+    reply->deleteLater();
 
     if(reply->error()) {
         Logging::instance()->add("CliToolConnector::initServiceSetupHandler: " + reply->errorString());
@@ -244,6 +245,9 @@ void CliToolConnector::requestHandler() {
     if(!reply) {
         return;
     }
+
+    reply->deleteLater();
+
     if(reply->error()) {
         qWarning() << reply->errorString();
     }
@@ -268,6 +272,9 @@ void CliToolConnector::setParamRequestHandler()
     if(!reply) {
         return;
     }
+
+    reply->deleteLater();
+
     if(reply->error()) {
         qWarning() << reply->errorString();
     }
@@ -300,13 +307,14 @@ void CliToolConnector::loadServiceConfigHandler()
     if(!reply) {
         return;
     }
+    reply->deleteLater();
 
     if(reply->error()) {
         qWarning() << reply->errorString();
     }
 
     QJsonDocument answ = QJsonDocument::fromJson(reply->readAll());
-    Logging::instance()->add("Set config server answer: " + answ.toJson());
+    Logging::instance()->add("auth to: " + answ["Rest"].toObject().value("Host").toString() + " as user " + answ["Rest"].toObject().value("Username").toString());
 
     if(!answ["error"].isUndefined()) {
         QString title = answ["error"].toObject().value("code").toString();
@@ -330,23 +338,23 @@ void CliToolConnector::getTokenRequestHandler()
     if(reply->error()) {
         Logging::instance()->add("CliToolConnector::getTokenRequestHandler: " + reply->errorString());
         emit loginFailed();
-        return;
+    } else {
+
+        QString token = reply->readAll().replace("\"","");
+        Logging::instance()->add("Get token data: " + token);
+
+        if(!token.isEmpty() && token != m_token) {
+            m_token = token;
+
+            emit tokenChanged();
+            loginSuccess();
+
+            m_settings->setValue("user", m_userName);
+            m_settings->setValue("password", m_password);
+            m_settings->sync();
+        }
+        initServiceSetup();
     }
-
-    QString token = reply->readAll().replace("\"","");
-    Logging::instance()->add("Get token data: " + token);
-
-    if(!token.isEmpty() && token != m_token) {
-        m_token = token;
-
-        emit tokenChanged();
-        loginSuccess();
-
-        m_settings->setValue("user", m_userName);
-        m_settings->setValue("password", m_password);
-        m_settings->sync();
-    }
-    initServiceSetup();
 }
 
 bool CliToolConnector::isLogined() const

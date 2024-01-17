@@ -9,7 +9,10 @@ class Settings : public QSettings
 {
     Q_OBJECT
 public:
-    Settings(const QString &fileName, QSettings::Format format = QSettings::Format::NativeFormat, QSettings *parent = nullptr);
+    Settings(const QString &filePath, QSettings::Format format = QSettings::Format::NativeFormat, QSettings *parent = nullptr);
+
+private slots:
+    void onSettingsUpdated();
 
 signals:
     void settingsUpdated();

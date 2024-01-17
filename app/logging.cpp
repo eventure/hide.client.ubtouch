@@ -13,7 +13,6 @@ Logging::Logging(QObject *parent)
     QMutexLocker locker(&m_lock);
 
     m_password = m_settings->value("password").toString();
-
     connect(m_settings
             , &Settings::settingsUpdated
             , this

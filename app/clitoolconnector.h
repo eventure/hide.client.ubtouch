@@ -48,10 +48,8 @@ private slots:
     void getTokenRequestHandler();
     void requestHandler();
     void setParamRequestHandler();
-
     void loadServiceConfig();
     void loadServiceConfigHandler();
-
     void initServiceSetupHandler();
 
 signals:

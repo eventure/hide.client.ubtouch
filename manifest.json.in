@@ -1,7 +1,7 @@
 {
     "name": "@CLICK_NAME@",
     "title": "hideme",
-    "version": "0.3.7",
+    "version": "0.3.11",
     "description": "A HideMe Ubuntu Touch client",
     "architecture": "@CLICK_ARCH@",
     "framework": "ubuntu-sdk-20.04",
