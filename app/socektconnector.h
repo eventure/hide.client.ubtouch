@@ -13,6 +13,8 @@ class SocektConnector : public QObject
 public:
     explicit SocektConnector(QString url, int port, QObject *parent = nullptr);
     QString code() const {return m_code;}
+    void start();
+    void stop();
 
 signals:
     void codeChanged();

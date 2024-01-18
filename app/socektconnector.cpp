@@ -13,7 +13,16 @@ SocektConnector::SocektConnector(QString url, int port, QObject *parent)
     , m_timer(new QTimer(this))
 {
     connect(m_timer, &QTimer::timeout, this, &SocektConnector::getState);
+}
+
+void SocektConnector::start()
+{
     m_timer->start(1000);
+}
+
+void SocektConnector::stop()
+{
+    m_timer->stop();
 }
 
 void SocektConnector::getState()

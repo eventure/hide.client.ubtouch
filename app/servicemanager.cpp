@@ -108,9 +108,11 @@ void ServiceManager::propertiesChanged(const QString &, const QVariantMap &prope
     if(activeStateStr == "active") {
         newStatus = ServiceStatus::STARTED;
         Logging::instance()->add("Service started");
+        m_connector->start();
     } else {
         newStatus = ServiceStatus::NOT_STARTED;
         Logging::instance()->add("Service not started");
+        m_connector->stop();
     }
 
     if(newStatus != m_currentStatus) {
