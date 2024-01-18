@@ -46,6 +46,7 @@ MainView {
     CliToolConnector{
         id: cli
         onTokenChanged: serviceManager.setAccessToken(cli.token)
+        onError: cli.makeDisconnection()
     }
 
     AuthenticationHandler {
