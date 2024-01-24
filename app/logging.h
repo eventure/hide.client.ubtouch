@@ -19,6 +19,7 @@ public:
 
     Q_INVOKABLE void add(QString message);
     Q_INVOKABLE QString storeToFile(QString path = "");
+    Q_INVOKABLE QString systemdStoreToFile();
     Q_INVOKABLE QString getLogString();
 
     int maxLenght() const;

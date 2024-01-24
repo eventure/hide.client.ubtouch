@@ -51,7 +51,7 @@ void Logging::add(QString message)
 QString Logging::storeToFile(QString path)
 {
     if(path.isEmpty()) {
-        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
+        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/app-hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
     }
 
     QFile file(path);
@@ -63,6 +63,11 @@ QString Logging::storeToFile(QString path)
     }
 
     return "";
+}
+
+QString Logging::systemdStoreToFile()
+{
+
 }
 
 QString Logging::getLogString()
