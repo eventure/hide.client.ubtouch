@@ -25,6 +25,7 @@ public:
     Q_INVOKABLE void makeRoute();
     Q_INVOKABLE void initServiceSetup();
     Q_INVOKABLE bool isDefaultServer(QString hostname);
+    Q_INVOKABLE void storeLogsToFile();
     Q_INVOKABLE void logout();
     Q_INVOKABLE void quit();
     bool connected() {return m_connected; }
@@ -51,6 +52,7 @@ private slots:
     void loadServiceConfig();
     void loadServiceConfigHandler();
     void initServiceSetupHandler();
+    void storeLogsToFileHandler();
 
 signals:
     void loginFailed();

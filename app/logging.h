@@ -18,13 +18,11 @@ public:
     static Logging* instance();
 
     Q_INVOKABLE void add(QString message);
-    Q_INVOKABLE QString storeToFile(QString path = "");
-    Q_INVOKABLE QString systemdStoreToFile();
+    Q_INVOKABLE void storeToFile();
     Q_INVOKABLE QString getLogString();
 
     int maxLenght() const;
     void setMaxLenght(int newMaxLenght);
-
     int lenght() const;
 
 signals:

@@ -218,6 +218,38 @@ bool CliToolConnector::isDefaultServer(QString hostname)
     return m_settings->value("defaultHost").toString() == hostname;
 }
 
+void CliToolConnector::storeLogsToFile()
+{
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkRequest request = QNetworkRequest(QUrl(QString("http://%1:%2/log").arg(m_url).arg(m_port)));
+    QNetworkReply *reply = mgr->get(request);
+
+    connect(reply, &QNetworkReply::finished, this, &CliToolConnector::storeLogsToFileHandler);
+}
+
+void CliToolConnector::storeLogsToFileHandler()
+{
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
+    if(!reply) {
+        return;
+    }
+    reply->deleteLater();
+
+    if(reply->error()) {
+        qWarning() << reply->errorString();
+    }
+
+    QString path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/cli-hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
+    QFile file(path);
+    if (file.open(QIODevice::ReadWrite)) {
+        QTextStream stream(&file);
+        stream << reply->readAll();
+        file.close();
+    }
+
+    Logging::instance()->storeToFile();
+}
+
 void CliToolConnector::logout()
 {
     Logging::instance()->add("Logout");

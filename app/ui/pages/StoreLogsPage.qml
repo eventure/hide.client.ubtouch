@@ -57,14 +57,12 @@ Page {
 
         text: qsTr("Save log file")
         onClicked: {
-            var logPath = logging.storeToFile()
-            if( logPath != "") {
-                PopupUtils.open(Qt.resolvedUrl("../dialogs/ErrorDialog.qml"), startServicePage,
+            cli.storeLogsToFile()
+            PopupUtils.open(Qt.resolvedUrl("../dialogs/ErrorDialog.qml"), startServicePage,
                                 {
                                     title: qsTr("Logs saved"),
-                                    message: qsTr("Application log saved to " + logPath)
+                                    message: qsTr("Application log saved to Documents directory")
                                 })
-            }
         }
     }
 }

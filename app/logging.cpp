@@ -48,26 +48,16 @@ void Logging::add(QString message)
     emit Logging::instance()->entryAdded();
 }
 
-QString Logging::storeToFile(QString path)
+void Logging::storeToFile()
 {
-    if(path.isEmpty()) {
-        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/app-hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
-    }
+    QString path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/app-hideme_" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".log";
 
     QFile file(path);
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
         stream << getLogString();
         file.close();
-        return path;
     }
-
-    return "";
-}
-
-QString Logging::systemdStoreToFile()
-{
-
 }
 
 QString Logging::getLogString()
