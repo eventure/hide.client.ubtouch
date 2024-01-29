@@ -36,6 +36,8 @@ ServiceManager::ServiceManager(QObject *parent)
                                     , m_settings->value("port", 5050).toInt() , this);
     connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
 
+    m_connector->start();
+
     QFile cli(m_program);
     Logging::instance()->add(m_program);
     m_cliAvailable = cli.exists();

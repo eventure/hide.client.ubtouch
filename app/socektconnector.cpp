@@ -38,6 +38,7 @@ void SocektConnector::getState()
         reply->deleteLater();
 
         if(reply->error()) {
+            m_timer->stop();
             Logging::instance()->add(reply->errorString());
         }
 
