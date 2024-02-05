@@ -1,3 +1,6 @@
 [submodule "tools/cli"]
 	path = tools/cli
 	url = https://github.com/eventure/hide.client.linux.git
+[submodule "libs/sentry"]
+	path = libs/sentry
+	url = git@github.com:getsentry/sentry-native.git

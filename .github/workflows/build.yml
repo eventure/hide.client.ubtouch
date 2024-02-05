@@ -35,7 +35,7 @@ jobs:
 
     - name: Build package
       run: |
-        CLICKABLE_FRAMEWORK=ubuntu-sdk-20.04 clickable build --arch ${{ matrix.arch }}
+        CLICKABLE_FRAMEWORK=ubuntu-sdk-20.04 clickable build --all --arch ${{ matrix.arch }}
       shell: bash
 
     - name : Upload artefacts

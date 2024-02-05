@@ -4,7 +4,8 @@ set(CMAKE_AUTOMOC ON)
 
 include_directories(
     ${CMAKE_BINARY_DIR}
-    ${sdkhelper_SOURCE_DIR})
+    ${sdkhelper_SOURCE_DIR}
+    $ENV{SENTRY_LIB_INSTALL_DIR}/include)
 
 set(SRC
     clitoolconnector.cpp
@@ -31,7 +32,8 @@ target_link_libraries(hideme
     Qt5::Qml
     Qt5::Quick
     Qt5::Gui
-    Qt5::DBus)
+    Qt5::DBus
+    -L$ENV{SENTRY_LIB_INSTALL_DIR}/lib -lsentry)
 
 install(TARGETS hideme RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(CLICK_MODE)
