@@ -33,7 +33,7 @@ ServiceManager::ServiceManager(QObject *parent)
     m_serviceProcess = new QProcess(this);
 
     m_connector = new SocektConnector(m_settings->value("url", "127.0.0.1").toString()
-                                    , m_settings->value("port", 5050).toInt() , this);
+                                      , m_settings->value("port", 5050).toInt() , this);
     connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
 
     m_connector->start();
@@ -49,7 +49,20 @@ ServiceManager::ServiceManager(QObject *parent)
     if(!QFile::exists("/etc/systemd/system/hideme.service")) {
         Logging::instance()->add("Service file not installed");
         m_currentStatus = ServiceStatus::NOT_INSTALLED;
+    } else {
+        QByteArray systemServiceHash = fileChecksum("/etc/systemd/system/hideme.service", QCryptographicHash::Md5);
+        QByteArray applicationServiceHash = fileChecksum(
+            #ifdef WITH_CLICK
+                    "/opt/click.ubuntu.com/hideme.ubports/current/hideme.service"
+            #else
+                    "/usr/share/hideme/hideme.service"
+            #endif
+                    , QCryptographicHash::Md5);
+        if(systemServiceHash != applicationServiceHash) {
+            m_currentStatus = ServiceStatus::NOT_INSTALLED;
+        }
     }
+
 
     QDBusMessage msg = QDBusMessage::createMethodCall(
                 s_serviceName,
@@ -258,21 +271,23 @@ void ServiceManager::setRootPassword(const QString &newRootPassword)
     m_rootPassword = newRootPassword;
     emit rootPasswordChanged();
 
-/*Check and update service file*/
+    /*Check and update service file*/
     if(QFile::exists("/etc/systemd/system/hideme.service")) {
         QByteArray systemServiceHash = fileChecksum("/etc/systemd/system/hideme.service", QCryptographicHash::Md5);
         QByteArray applicationServiceHash = fileChecksum(
-#ifdef WITH_CLICK
+            #ifdef WITH_CLICK
                     "/opt/click.ubuntu.com/hideme.ubports/current/hideme.service"
-#else
+            #else
                     "/usr/share/hideme/hideme.service"
-#endif
+            #endif
                     , QCryptographicHash::Md5);
 
 
         if(systemServiceHash != applicationServiceHash) {
             Logging::instance()->add("service file outdated. updating service file");
             installServies();
+            m_currentStatus = ServiceStatus::NOT_STARTED;
+            emit currentStatusChanged();
         }
     }
 }
@@ -307,7 +322,7 @@ void ServiceManager::setStartOnBoot(bool newStartOnBoot)
 }
 
 QByteArray ServiceManager::fileChecksum(const QString &fileName,
-                        QCryptographicHash::Algorithm hashAlgorithm)
+                                        QCryptographicHash::Algorithm hashAlgorithm)
 {
     QFile f(fileName);
     if (f.open(QFile::ReadOnly)) {
