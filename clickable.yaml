@@ -3,7 +3,7 @@ builder: cmake
 framework: ubuntu-sdk-20.04
 dependencies_host:
 - cmake-extras
-- golang-1.18
+- golang-1.21
 skip_review: true
 ignore_review_errors: true
 install_bin:

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(hideme VERSION 0.4.8 LANGUAGES CXX)
+project(hideme VERSION 0.5 LANGUAGES CXX)
 include(FindGettext)
 if(NOT GETTEXT_FOUND)
     message(FATAL_ERROR "Could not find gettext")
