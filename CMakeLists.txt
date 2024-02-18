@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(hideme VERSION 0.1 LANGUAGES CXX)
+project(hideme VERSION 0.4.8 LANGUAGES CXX)
 include(FindGettext)
 if(NOT GETTEXT_FOUND)
     message(FATAL_ERROR "Could not find gettext")
@@ -30,7 +30,8 @@ if(CLICK_MODE)
     set(URLS_DIR ${DATA_DIR})
 
     add_compile_definitions(WITH_CLICK)
-    set(CLI_PATH "/opt/click.ubuntu.com/hideme.ubports/current/lib/aarch64-linux-gnu/bin/hide.me")
+    set(CLI_PATH /opt/click.ubuntu.com/hideme.ubports/${PROJECT_VERSION}/lib/aarch64-linux-gnu/bin/hide.me)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_BINARY_DIR}/../sentry/${ARCH_TRIPLET}/install")
 
     configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/manifest.json ${APP_NAME}.apparmor DESTINATION ${CMAKE_INSTALL_PREFIX})
@@ -60,6 +61,7 @@ add_custom_target(${DESKTOP_FILE} ALL
 )
 
 find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick DBus REQUIRED)
+find_package(SENTRY CONFIG REQUIRED)
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 configure_file(hideme.service.in ${CMAKE_CURRENT_BINARY_DIR}/hideme.service @ONLY)
 
@@ -83,3 +85,12 @@ else(CLICK_MODE)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CA.pem  DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hideme.service DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${APP_NAME}/)
 endif(CLICK_MODE)
+
+
+if(NOT SENTRY_FOUND)
+    message(SEND_ERROR "Failed to find Sentry")
+    return()
+else()
+    message(STATUS "Found Sentry: " $ENV{SENTRY_LIB_INSTALL_DIR})
+    include_directories(${SENTRY_LIB_INSTALL_DIR})
+endif()
