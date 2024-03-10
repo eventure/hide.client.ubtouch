@@ -67,6 +67,7 @@ configure_file(hideme.service.in ${CMAKE_CURRENT_BINARY_DIR}/hideme.service @ONL
 
 add_subdirectory(app)
 add_subdirectory(po)
+add_subdirectory(tests)
 
 if(BUILD_CLI)
     add_subdirectory(tools)
