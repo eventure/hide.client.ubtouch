@@ -26,5 +26,4 @@ add_custom_command(
     COMMENT "Run tests"
     POST_BUILD
     COMMAND LD_PRELOAD=$ENV{SENTRY_LIB_INSTALL_DIR}/lib/libsentry.so ./test_sentry
-    WILL_FAIL TRUE
 )

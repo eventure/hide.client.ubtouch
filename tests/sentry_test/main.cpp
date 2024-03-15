@@ -18,5 +18,5 @@ int main(int argc, char** argv)
                             "It works!"
     ));
 
-    return 1;
+    return EXIT_SUCCESS;
 }
