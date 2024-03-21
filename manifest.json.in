@@ -2,10 +2,10 @@
     "name": "@CLICK_NAME@",
     "title": "hideme",
     "version": "0.5",
-    "description": "A HideMe Ubuntu Touch client",
+    "description": "hide.me VPN Ubuntu Touch client",
     "architecture": "@CLICK_ARCH@",
     "framework": "ubuntu-sdk-20.04",
-    "maintainer": "Chupligin Sergey <neochapay@gmail.com>",
+    "maintainer": "hide.me VPN <support@hide.me>",
     "hooks": {
         "hideme": {
             "apparmor": "hideme.apparmor",
