@@ -1,0 +1,28 @@
+#ifndef CONFIG_H_IN
+#define CONFIG_H_IN
+
+#include <QDebug>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
+
+inline bool isRunningInstalled()
+{
+    static bool installed = (QCoreApplication::applicationDirPath() == QDir(("@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@")).canonicalPath());
+    return installed;
+}
+
+inline QString appDirectory()
+{
+    if (QCoreApplication::applicationDirPath().startsWith("/opt/click")) {
+        return QString("%1/ui/").arg(QString(QCoreApplication::applicationDirPath()));
+        qDebug() << "Click";
+    } else if (isRunningInstalled()) {
+        qDebug() << "Desktop";
+        return QString("@CMAKE_INSTALL_FULL_DATADIR@/@APP_NAME@/ui");
+    } else {
+        qDebug() << "Develop";
+        return QString("@CMAKE_CURRENT_SOURCE_DIR@/app/ui");
+    }
+}
+
+#endif // CONFIG_H_IN

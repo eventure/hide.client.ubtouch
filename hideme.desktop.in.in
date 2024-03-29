@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=hide.me VPN
+Comment=VPN application
+Type=Application
+Terminal=false
+Exec=@EXEC@
+Icon=@ICON@
+X-Lomiri-Touch=true
+X-Lomiri-Single-Instance=true
+X-Lomiri-Splash-Show-Header=false
+X-Lomiri-Splash-Color=#2AA9E0
+X-Lomiri-Splash-Color-Footer=#FFFFFF
+X-Lomiri-Splash-Color-Header=#EFFFFF
+X-Lomiri-Splash-Image=@SPLASH@

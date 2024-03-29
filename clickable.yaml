@@ -1,0 +1,25 @@
+clickable_minimum_required: '8.0'
+builder: cmake
+framework: ubuntu-sdk-20.04
+dependencies_host:
+- cmake-extras
+- golang-1.21
+skip_review: true
+ignore_review_errors: true
+install_bin:
+- ${ROOT}/tools/cli/hide.me
+libraries:
+  sentry:
+    builder: cmake
+    make_jobs: 2
+    build_args: [
+      -DSENTRY_INTEGRATION_QT=ON,
+      -DBUILD_SHARED_LIBS=ON,
+      -DCMAKE_CROSSCOMPILING=OFF,
+      -SENTRY_BUILD_FORCE32=OFF
+    ]
+    dependencies_target:
+    - libcurl4-openssl-dev
+    - curl
+install_lib:
+    - libsentry.so*

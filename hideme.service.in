@@ -1,0 +1,11 @@
+[Unit]
+Description=Hideme background service
+
+[Service]
+Type=simple
+ExecStart=@CLI_PATH@ --caddr 127.0.0.1:5050 service
+Restart=always
+TimeoutStartSec=60
+
+[Install]
+WantedBy=graphical.target

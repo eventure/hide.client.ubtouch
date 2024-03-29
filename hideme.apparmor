@@ -1,0 +1,21 @@
+{
+    "policy_version": 20.04,
+    "template": "unconfined",
+    "policy_groups": [
+        "networking",
+        "connectivity",
+        "location"
+    ],
+    "read_path": [
+        "/etc/systemd/system/",
+        "@{HOME}/.config/",
+        "@{HOME}/.local/share/hideme/"
+    ],
+    "write_path": [
+        "/etc/systemd/system/",
+        "@{HOME}/.config/",
+        "@{HOME}/.local/share/hideme/"
+    ]
+
+}
+

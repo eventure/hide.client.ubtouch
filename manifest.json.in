@@ -1,0 +1,15 @@
+{
+    "name": "@CLICK_NAME@",
+    "title": "hideme",
+    "version": "0.5",
+    "description": "hide.me VPN Ubuntu Touch client",
+    "architecture": "@CLICK_ARCH@",
+    "framework": "ubuntu-sdk-20.04",
+    "maintainer": "hide.me VPN <support@hide.me>",
+    "hooks": {
+        "hideme": {
+            "apparmor": "hideme.apparmor",
+            "desktop": "hideme.desktop"
+        }
+    }
+}

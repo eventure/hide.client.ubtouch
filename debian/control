@@ -1,0 +1,24 @@
+Source: hideme
+Section: network
+Priority: normal
+Maintainer: Chupligin Sergey <neochapay@gmail.com>
+Build-Depends: cmake,
+		debhelper-compat (= 12),
+		dh-migrations:native,
+		qtdeclarative5-dev,
+		qtbase5-dev
+Standards-Version: 3.9.4
+Homepage: https://hide.me/
+Vcs-Git: https://github.com/eventure/hide.client.ubtouch.git
+Vcs-Browser: https://github.com/eventure/hide.client.ubtouch
+
+Package: hideme
+Architecture: any
+Multi-Arch: same
+Depends: mediascanner2.0,
+         qml-module-lomiri-content,
+         qml-module-qtquick2,
+         qml-module-lomiri-components,
+         qml-module-lomiri-layouts,
+         qml-module-qtquick-window2,
+Description: HideMe vpc client

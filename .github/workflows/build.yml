@@ -1,0 +1,47 @@
+name: Build Click
+
+on: [push]
+
+jobs:
+  build:
+    name: Build click
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        arch: [amd64, arm64, armhf]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+          submodules: recursive
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Initialization environment
+      run: |
+         for pkg in docker.io docker-doc docker-compose containerd runc; do sudo apt-get remove $pkg; done
+         sudo apt-get update
+         sudo apt-get install ca-certificates curl gnupg
+         sudo install -m 0755 -d /etc/apt/keyrings
+         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+         sudo chmod a+r /etc/apt/keyrings/docker.gpg
+         echo \
+            "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+            "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+         sudo add-apt-repository ppa:bhdouglass/clickable -y
+         sudo apt-get update
+         sudo apt-get install docker-ce containerd.io clickable
+
+    - name: Build package
+      run: |
+        CLICKABLE_FRAMEWORK=ubuntu-sdk-20.04 clickable build --all --arch ${{ matrix.arch }}
+      shell: bash
+
+    - name : Upload artefacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: hideme_ubports_${{ matrix.arch }}
+        path: build/*/app/*.click
+        if-no-files-found: error
