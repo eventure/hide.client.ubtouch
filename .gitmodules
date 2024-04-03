@@ -3,4 +3,4 @@
 	url = https://github.com/eventure/hide.client.linux.git
 [submodule "libs/sentry"]
 	path = libs/sentry
-	url = git@github.com:getsentry/sentry-native.git
+	url = https://github.com/getsentry/sentry-native.git
