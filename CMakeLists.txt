@@ -11,7 +11,7 @@ include(GNUInstallDirs)
 option(CLICK_MODE "Installs to a contained location" on)
 option(BUILD_CLI "Installs to a contained location" on)
 
-set(CLICK_NAME hideme.ubports)
+set(CLICK_NAME hideme.eventure)
 set(APP_NAME hideme)
 set(DESKTOP_FILE "${PROJECT_NAME}.desktop")
 set(ICON_FILE app/graphics/hideme-app.svg)
