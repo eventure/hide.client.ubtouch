@@ -46,7 +46,7 @@ void SocektConnector::getState()
 
         QString code = answ["result"].toObject().value("code").toString();
 
-        if(code != m_code) {
+        if(!code.isEmpty() && code != m_code) {
             Logging::instance()->add("Current state is:" + code);
             m_code = code;
             emit codeChanged();

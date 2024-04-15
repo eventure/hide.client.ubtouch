@@ -1,6 +1,5 @@
 import QtQuick 2.4
 import Lomiri.Components 1.3
-import Lomiri.Components.Extras.PamAuthentication 0.1
 import hide.me 1.0
 import "../components"
 
@@ -9,12 +8,6 @@ Page {
 
     header: PageHeader {
         title: qsTr("Setup service")
-    }
-
-    Component.onCompleted: {
-        if(!mainView.fullAccessGranted) {
-            authentication.authenticate()
-        }
     }
 
     Column {
@@ -73,11 +66,6 @@ Page {
                        } else {
                            serviceManager.stopServie()
                        }
-        }
-
-
-        Component.onCompleted: {
-            console.log(serviceManager.currentStatus)
         }
     }
 }
