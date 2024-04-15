@@ -21,6 +21,8 @@ set(SRC
     servicemanager.h
     serverselectionmodel.cpp
     serverselectionmodel.h
+    systemdmanager.cpp
+    systemdmanager.h
     logging.cpp
     logging.h)
 

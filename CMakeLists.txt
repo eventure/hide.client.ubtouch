@@ -10,6 +10,7 @@ include(GNUInstallDirs)
 
 option(CLICK_MODE "Installs to a contained location" on)
 option(BUILD_CLI "Installs to a contained location" on)
+option(BUILD_TESTS "Build tests" on)
 
 set(CLICK_NAME hideme.ubports)
 set(APP_NAME hideme)
@@ -67,7 +68,9 @@ configure_file(hideme.service.in ${CMAKE_CURRENT_BINARY_DIR}/hideme.service @ONL
 
 add_subdirectory(app)
 add_subdirectory(po)
-add_subdirectory(tests)
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
 if(BUILD_CLI)
     add_subdirectory(tools)

@@ -7,12 +7,10 @@
         "location"
     ],
     "read_path": [
-        "/etc/systemd/system/",
         "@{HOME}/.config/",
         "@{HOME}/.local/share/hideme/"
     ],
     "write_path": [
-        "/etc/systemd/system/",
         "@{HOME}/.config/",
         "@{HOME}/.local/share/hideme/"
     ]
