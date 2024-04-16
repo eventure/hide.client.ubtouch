@@ -4,8 +4,6 @@ import Lomiri.Components.Popups 1.3
 
 import hide.me 1.0
 
-import "authentication"
-
 MainView {
     id: mainView
     objectName: "hidemeVPN"
@@ -46,12 +44,6 @@ MainView {
     CliToolConnector{
         id: cli
         onError: cli.makeDisconnection()
-    }
-
-    AuthenticationHandler {
-        id: authentication
-        serviceName: "hideme"
-        onAuthenticationSucceeded: fullAccessGranted = true
     }
 
     Connections{

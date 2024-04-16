@@ -3,18 +3,16 @@
 
 #include "socektconnector.h"
 
-#include <QDBusConnection>
-#include <QDBusPendingCallWatcher>
 #include <QObject>
 #include <QProcess>
 #include "settings.h"
+#include "systemdmanager.h"
 
 class ServiceManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool cliAvailable READ cliAvailable)
     Q_PROPERTY(bool startOnBoot READ startOnBoot WRITE setStartOnBoot NOTIFY startOnBootChanged)
-    Q_PROPERTY(QString rootPassword READ rootPassword WRITE setRootPassword NOTIFY rootPasswordChanged)
     Q_PROPERTY(ServiceStatus currentStatus READ currentStatus NOTIFY currentStatusChanged)
 
 public:
@@ -37,34 +35,22 @@ public:
     Q_INVOKABLE void startServie();
     Q_INVOKABLE void stopServie();
 
-    void checkServerStatus(QDBusPendingCallWatcher* watcher);
-
     bool cliAvailable() const;
 
     ServiceStatus currentStatus() const;
-
-    QString rootPassword() const;
-    void setRootPassword(const QString &newRootPassword);
 
     bool startOnBoot() const;
     void setStartOnBoot(bool newStartOnBoot);
 
 signals:
     void currentStatusChanged();
-    void rootPasswordChanged();
-
     void startOnBootChanged();
 
 private slots:
-    void startServiceHandler();
-
-    void onServiceFileChanged(const QString &path);
-    void propertiesChanged(const QString&, const QVariantMap& properties, const QStringList&);
     void socketCodeChangedHandler();
+    void onServiceStatusChanged();
 
 private:
-    QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm);
-
     Settings* m_settings;
     QProcess* m_serviceProcess;
 
@@ -72,9 +58,8 @@ private:
     bool m_cliAvailable;
     bool m_connected;
     ServiceStatus m_currentStatus;
-    QDBusConnection m_systemDBusConnection;
-    QString m_rootPassword;
     SocektConnector* m_connector;
+    SystemDManager* m_sysDmanager;
 };
 Q_DECLARE_METATYPE(ServiceManager::ServiceStatus)
 
