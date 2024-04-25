@@ -38,30 +38,7 @@ ServiceManager::ServiceManager(QObject *parent)
     Logging::instance()->add(m_program);
     m_cliAvailable = cli.exists();
 
-    if(!m_sysDmanager->serviceFileInstalled()) {
-        Logging::instance()->add("Service file not installed");
-        m_currentStatus = ServiceStatus::NOT_INSTALLED;
-        Logging::instance()->add("NOT INSTALLED!!!");
-    } else if(!m_sysDmanager->serviceFileIsActual(
-                          #ifdef WITH_CLICK
-                                  "/opt/click.ubuntu.com/hideme.ubports/current/hideme.service"
-                          #else
-                                  "/usr/share/hideme/hideme.service"
-                          #endif
-                  ))
-    {
-        m_currentStatus = ServiceStatus::NOT_INSTALLED;
-        Logging::instance()->add("NOT ACTUAL!!!");
-    } else {
-        m_currentStatus = ServiceStatus::NOT_STARTED;
-        Logging::instance()->add("NOT STARTED!!!");
-
-        if(m_sysDmanager->serviceRunning()) {
-            m_currentStatus = ServiceStatus::STARTED;
-        }
-    }
-
-    connect(m_sysDmanager, &SystemDManager::serviceFileInstalledChanged, this, &ServiceManager::currentStatusChanged);
+    onServiceStatusChanged();
     connect(m_sysDmanager, &SystemDManager::serviceStatusChanged, this, &ServiceManager::onServiceStatusChanged);
 }
 
@@ -79,8 +56,10 @@ void ServiceManager::socketCodeChangedHandler()
     ServiceManager::ServiceStatus newStatus;
 
     if(state.isEmpty()) {
-        newStatus = ServiceStatus::NOT_STARTED;
-    } else if(state == "routed") {
+        return;
+    }
+
+    if(state == "routed") {
         newStatus = ServiceStatus::CONNECTING;
     } else if (state == "clean") {
         newStatus = ServiceStatus::STARTED;
@@ -102,14 +81,19 @@ void ServiceManager::onServiceStatusChanged()
 {
     Logging::instance()->add("Serive status changed!!!");
 
-    ServiceManager::ServiceStatus newStatus;
-    if(m_sysDmanager->serviceRunning()) {
+    ServiceManager::ServiceStatus newStatus = ServiceManager::UNKNOW;
+    if(m_sysDmanager->currentStatus() == SystemDManager::SystemDServiceStatus::NOT_INSTALLED) {
+        Logging::instance()->add("Service file not installed");
+        m_currentStatus = ServiceStatus::NOT_INSTALLED;
+    } else if(m_sysDmanager->currentStatus() == SystemDManager::SystemDServiceStatus::STARTED) {
+        Logging::instance()->add("Service is started");
         newStatus = ServiceStatus::STARTED;
-    } else {
+    } else if(m_sysDmanager->currentStatus() == SystemDManager::SystemDServiceStatus::NOT_STARTED){
+        Logging::instance()->add("Service not started");
         newStatus = ServiceManager::NOT_STARTED;
     }
 
-    if(newStatus != m_currentStatus) {
+    if(newStatus != ServiceManager::UNKNOW && newStatus != m_currentStatus) {
         m_currentStatus = newStatus;
         emit currentStatusChanged();
     }
@@ -119,7 +103,7 @@ void ServiceManager::installServies()
 {
     m_sysDmanager->installServiceFile(
             #ifdef WITH_CLICK
-                "/opt/click.ubuntu.com/hideme.ubports/current/hideme.service"
+                "/opt/click.ubuntu.com/hideme.eventure/current/hideme.service"
             #else
                 "/usr/share/hideme/hideme.service"
             #endif

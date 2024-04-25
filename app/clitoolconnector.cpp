@@ -113,6 +113,13 @@ void CliToolConnector::getTokenRequest()
     QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
     QNetworkRequest request = QNetworkRequest(QUrl("https://free.hideservers.net:432/v1.0.0/accessToken"));
     QSslConfiguration sslconf = QSslConfiguration();
+    if(m_caPath.isEmpty()) {
+        qWarning() << "CA.pem is empty";
+    }
+
+    if(!QFile::exists(m_caPath)) {
+        qWarning() << "CA.pem " << m_caPath << " not found";
+    }
 
     sslconf.setCaCertificates(QSslCertificate::fromPath(m_caPath));
 
@@ -121,11 +128,11 @@ void CliToolConnector::getTokenRequest()
 
     QJsonObject obj;
     obj["domain"] = "hide.me";
-    obj["host"] = "free";
+    obj["host"] = "";
     obj["username"] = m_userName.simplified().remove(' ');
     obj["password"] = m_password.simplified().remove(' ');
     QJsonDocument doc(obj);
-    QByteArray data = doc.toJson();
+    QByteArray data = doc.toJson(QJsonDocument::Compact);
 
     QNetworkReply *reply = mgr->post(request, data);
     connect(reply, &QNetworkReply::finished, this, &CliToolConnector::getTokenRequestHandler);
