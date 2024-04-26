@@ -10,7 +10,7 @@ static const QString s_unitIface = QStringLiteral("org.freedesktop.systemd1.Unit
 static const QString s_propertyActiveState = QStringLiteral("ActiveState");
 
 #ifdef WITH_CLICK
-    static const QString CA_PEM_PATH = "/opt/click.ubuntu.com/hideme.ubports/current/CA.pem";
+    static const QString CA_PEM_PATH = "/opt/click.ubuntu.com/hideme.eventure/current/CA.pem";
 #else
     static const QString CA_PEM_PATH = "/usr/share/hideme/CA.pem";
 #endif

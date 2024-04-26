@@ -26,7 +26,7 @@ SystemDManager::SystemDManager(const QString &serviceName, QObject *parent)
 
     QFileSystemWatcher *serviceWatcher = new QFileSystemWatcher();
     serviceWatcher->addPath(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/");
-    connect(serviceWatcher, &QFileSystemWatcher::directoryChanged, this, &SystemDManager::serviceFileInstalledChanged);
+    connect(serviceWatcher, &QFileSystemWatcher::directoryChanged, this, &SystemDManager::onServiceDirChanged);
 
     QDBusMessage msg = QDBusMessage::createMethodCall(
                 s_serviceName,
@@ -46,6 +46,8 @@ SystemDManager::SystemDManager(const QString &serviceName, QObject *parent)
                     "PropertiesChanged",
                     this,
                     SLOT(propertiesChanged(QString, QVariantMap, QStringList)));
+
+    calcServiceStatus();
 }
 
 bool SystemDManager::serviceFileInstalled() const
@@ -111,6 +113,7 @@ bool SystemDManager::installServiceFile(const QString currentPath)
 
     // Reload the systemd daemon
     m_systemdInterface.call("Reload");
+    calcServiceStatus();
     return true;
 }
 
@@ -162,7 +165,8 @@ bool SystemDManager::isStartOnBoot() const
 
 void SystemDManager::onServiceDirChanged(const QString &path)
 {
-    emit serviceFileInstalledChanged();
+    Q_UNUSED(path);
+    calcServiceStatus();
 }
 
 void SystemDManager::checkServerStatus(QDBusPendingCallWatcher *watcher)
@@ -176,12 +180,41 @@ void SystemDManager::checkServerStatus(QDBusPendingCallWatcher *watcher)
     }
 
     Logging::instance()->add("Service status is " + reply.value().toString());
-    emit serviceStatusChanged();
+    calcServiceStatus();
 }
 
 void SystemDManager::propertiesChanged(const QString &, const QVariantMap &properties, const QStringList &)
 {
-    emit serviceStatusChanged();
+    calcServiceStatus();
+}
+
+void SystemDManager::calcServiceStatus()
+{
+    SystemDServiceStatus newStatus = SystemDServiceStatus::NOT_INSTALLED;
+    if(!serviceFileInstalled()) {
+        Logging::instance()->add("Service file not installed");
+        newStatus = SystemDServiceStatus::NOT_INSTALLED;
+    } else if(!serviceFileIsActual(
+              #ifdef WITH_CLICK
+                      "/opt/click.ubuntu.com/hideme.eventure/current/hideme.service"
+              #else
+                      "/usr/share/hideme/hideme.service"
+              #endif
+      )) {
+        m_currentStatus = SystemDServiceStatus::NOT_INSTALLED;
+        Logging::instance()->add("NOT ACTUAL!!!");
+    } else if(serviceRunning()) {
+        Logging::instance()->add("Service is started");
+        newStatus = SystemDServiceStatus::STARTED;
+    } else {
+        Logging::instance()->add("Service not started");
+        newStatus = SystemDServiceStatus::NOT_STARTED;
+    }
+
+    if(newStatus != m_currentStatus) {
+        m_currentStatus = newStatus;
+        emit serviceStatusChanged();
+    }
 }
 
 QByteArray SystemDManager::fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm) const

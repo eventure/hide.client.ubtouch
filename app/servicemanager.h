@@ -17,7 +17,7 @@ class ServiceManager : public QObject
 
 public:
     enum ServiceStatus{
-        UNKNOW,
+        UNKNOW = -1,
         NOT_INSTALLED,
         NOT_STARTED,
         STARTED,
