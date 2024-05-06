@@ -122,6 +122,13 @@ void ServiceManager::stopServie()
     m_sysDmanager->stopService();
 }
 
+#ifdef SYSTEMD_WITH_ROOT
+void ServiceManager::setRootPassword(const QString &newRootPassword)
+{
+    m_sysDmanager->setRootPassword(newRootPassword);
+}
+#endif
+
 bool ServiceManager::cliAvailable() const
 {
     return m_cliAvailable;

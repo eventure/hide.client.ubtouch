@@ -35,15 +35,16 @@ public:
     Q_INVOKABLE void installServies();
     Q_INVOKABLE void startServie();
     Q_INVOKABLE void stopServie();
-
+#ifdef SYSTEMD_WITH_ROOT
+    Q_INVOKABLE void setRootPassword(const QString &newRootPassword);
+#endif
+    Q_INVOKABLE bool withRoot() const;
     bool cliAvailable() const;
 
     ServiceStatus currentStatus() const;
 
     bool startOnBoot() const;
     void setStartOnBoot(bool newStartOnBoot);
-
-    bool withRoot() const;
 
 signals:
     void currentStatusChanged();
