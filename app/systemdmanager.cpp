@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QFileSystemWatcher>
 #include <QDBusReply>
+#include <QProcess>
 
 #include "constants.h"
 #include "logging.h"
@@ -61,7 +62,6 @@ SystemDManager::SystemDManager(const QString &serviceName, QObject *parent)
 
 bool SystemDManager::serviceFileInstalled() const
 {
-    qDebug() << servicePath();
     return QFile::exists(servicePath());
 }
 
@@ -105,15 +105,24 @@ bool SystemDManager::serviceRunning()
 
 bool SystemDManager::installServiceFile(const QString currentPath)
 {
+    if(currentPath.isEmpty() || !QFile::exists(currentPath)) {
+        return false;
+    }
+
+#ifdef SYSTEMD_WITH_ROOT
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add("Empty root passrord");
+        return false;
+    }
+    QProcess *serviceInstallProcess = new QProcess();
+    serviceInstallProcess->start("/bin/bash" , QStringList());
+    serviceInstallProcess->write(QString("echo '%1' | sudo -S cp %2 %3\n").arg(m_rootPassword).arg(currentPath).arg(m_systemDDirPath).toUtf8());
+#else
     if(QFile::exists(servicePath())) {
         QFile::remove(servicePath());
     }
 
     QDir().mkpath(m_systemDDirPath);
-
-    if(currentPath.isEmpty() || !QFile::exists(currentPath)) {
-        return false;
-    }
 
     if(!QFile::copy(currentPath, servicePath())) {
         Logging::instance()->add("can't copy servie from " + currentPath + " to " + servicePath());
@@ -122,6 +131,7 @@ bool SystemDManager::installServiceFile(const QString currentPath)
 
     // Reload the systemd daemon
     m_systemdInterface.call("Reload");
+#endif
     calcServiceStatus();
     return true;
 }
@@ -133,21 +143,71 @@ bool SystemDManager::removeServiceFile()
 
 void SystemDManager::startService()
 {
+#ifdef SYSTEMD_WITH_ROOT
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add( "Empty root passrord" );
+        return;
+    }
+
+    QProcess *myProcess = new QProcess();
+    myProcess->start("/bin/bash" , QStringList());
+    myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl start %2\n").arg(m_rootPassword).arg(m_serviceName).toUtf8());
+#else
     m_systemdInterface.call("StartUnit", m_serviceName + ".service", "fail");
+#endif
+    Logging::instance()->add( "Service start" );
 }
 
 void SystemDManager::stopService()
 {
+#ifdef SYSTEMD_WITH_ROOT
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add( "Empty root passrord" );
+        return;
+    }
+
+    QProcess *myProcess = new QProcess();
+    myProcess->start("/bin/bash" , QStringList());
+    myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl stop %2\n").arg(m_rootPassword).arg(m_serviceName).toUtf8());
+#else
     m_systemdInterface.call("StopUnit", m_serviceName + ".service", "fail");
+#endif
+    Logging::instance()->add( "Service stop" );
 }
 
 void SystemDManager::restartService()
 {
+#ifdef SYSTEMD_WITH_ROOT
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add( "Empty root passrord" );
+        return;
+    }
+
+    QProcess *myProcess = new QProcess();
+    myProcess->start("/bin/bash" , QStringList());
+    myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl restart %2\n").arg(m_rootPassword).arg(m_serviceName).toUtf8());
+#else
     m_systemdInterface.call("RestartUnit", m_serviceName + ".service", "fail");
+#endif
+    Logging::instance()->add( "Service restart" );
 }
 
 void SystemDManager::startOnBoot(bool start)
 {
+    QString action = "disable";
+    if(start) {
+        action = "enable";
+    }
+#ifdef SYSTEMD_WITH_ROOT
+    if(m_rootPassword.isEmpty()) {
+        Logging::instance()->add( "Empty root passrord" );
+        return;
+    }
+
+    QProcess *myProcess = new QProcess();
+    myProcess->start("/bin/bash" , QStringList());
+    myProcess->write(QString("echo '%1' | sudo -S /usr/bin/systemctl %2 %3\n").arg(m_rootPassword).arg(action).arg(m_serviceName).toUtf8());
+#else
     if(start) {
         if (!QDir(m_systemDDirPath + m_systemDTarget + ".target.wants").exists()) {
             Logging::instance()->add("creating systemd directory");
@@ -165,6 +225,8 @@ void SystemDManager::startOnBoot(bool start)
     }
 
     m_systemdInterface.call("Reload");
+#endif
+    Logging::instance()->add("Service " + action + " on boot");
 }
 
 bool SystemDManager::isStartOnBoot() const
@@ -241,4 +303,17 @@ QByteArray SystemDManager::fileChecksum(const QString &fileName, QCryptographicH
 QString SystemDManager::servicePath() const
 {
     return m_systemDDirPath + m_serviceName + ".service";
+}
+
+QString SystemDManager::rootPassword() const
+{
+    return m_rootPassword;
+}
+
+void SystemDManager::setRootPassword(const QString &newRootPassword)
+{
+    if (m_rootPassword == newRootPassword)
+        return;
+    m_rootPassword = newRootPassword;
+    emit rootPasswordChanged();
 }

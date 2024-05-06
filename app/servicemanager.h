@@ -12,6 +12,7 @@ class ServiceManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool cliAvailable READ cliAvailable)
+    Q_PROPERTY(bool withRoot READ withRoot CONSTANT)
     Q_PROPERTY(bool startOnBoot READ startOnBoot WRITE setStartOnBoot NOTIFY startOnBootChanged)
     Q_PROPERTY(ServiceStatus currentStatus READ currentStatus NOTIFY currentStatusChanged)
 
@@ -41,6 +42,8 @@ public:
 
     bool startOnBoot() const;
     void setStartOnBoot(bool newStartOnBoot);
+
+    bool withRoot() const;
 
 signals:
     void currentStatusChanged();

@@ -141,3 +141,12 @@ void ServiceManager::setStartOnBoot(bool newStartOnBoot)
 {
     m_sysDmanager->startOnBoot(newStartOnBoot);
 }
+
+bool ServiceManager::withRoot() const
+{
+#ifdef SYSTEMD_WITH_ROOT
+    return true;
+#else
+    return false;
+#endif
+}

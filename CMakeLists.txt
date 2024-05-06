@@ -11,12 +11,17 @@ include(GNUInstallDirs)
 option(CLICK_MODE "Installs to a contained location" on)
 option(BUILD_CLI "Installs to a contained location" on)
 option(BUILD_TESTS "Build tests" on)
+option(SYSTEMD_ON_ROOT "Install systemd services into rootfs" off)
 
 set(CLICK_NAME hideme.eventure)
 set(APP_NAME hideme)
 set(DESKTOP_FILE "${PROJECT_NAME}.desktop")
 set(ICON_FILE app/graphics/hideme-app.svg)
 set(SPLASH_FILE app/graphics/hideme-app-splash.svg)
+
+if(SYSTEMD_ON_ROOT)
+    add_compile_definitions(SYSTEMD_WITH_ROOT)
+endif()
 
 if(CLICK_MODE)
     set(CMAKE_INSTALL_PREFIX /)
