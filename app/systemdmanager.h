@@ -49,8 +49,10 @@ private:
     QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm = QCryptographicHash::Md5) const;
 
     QString m_serviceName;
+    const QString m_systemDDirPath;
+    const QString m_systemDTarget;
     QDBusInterface m_systemdInterface;
-    QDBusConnection m_sessionDBusConnection;
+    QDBusConnection m_dBusConnection;
 
     SystemDServiceStatus m_currentStatus;
 };

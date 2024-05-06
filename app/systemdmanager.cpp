@@ -13,19 +13,28 @@
 SystemDManager::SystemDManager(const QString &serviceName, QObject *parent)
     : QObject{parent}
     , m_serviceName(serviceName)
+#ifdef SYSTEMD_WITH_ROOT
+    , m_systemDDirPath("/etc/systemd/system/")
+    , m_systemDTarget("graphical")
+    , m_systemdInterface(s_serviceName, s_dbusPath, s_managerIface, QDBusConnection::systemBus())
+    , m_dBusConnection(QDBusConnection::systemBus())
+#else
+    , m_systemDDirPath(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/")
+    , m_systemDTarget("ubuntu-touch-session")
     , m_systemdInterface(s_serviceName, s_dbusPath, s_managerIface, QDBusConnection::sessionBus())
-    , m_sessionDBusConnection(QDBusConnection::sessionBus())
+    , m_dBusConnection(QDBusConnection::sessionBus())
+#endif
 {
     if (!m_systemdInterface.isValid()) {
         qFatal("Failed to connect to systemd bus!");
     }
 
-    if (!m_sessionDBusConnection.isConnected()) {
-        qFatal("Can't connect to session bus");
+    if (!m_dBusConnection.isConnected()) {
+        qFatal("Can't connect to dbus");
     }
 
     QFileSystemWatcher *serviceWatcher = new QFileSystemWatcher();
-    serviceWatcher->addPath(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/");
+    serviceWatcher->addPath(m_systemDDirPath);
     connect(serviceWatcher, &QFileSystemWatcher::directoryChanged, this, &SystemDManager::onServiceDirChanged);
 
     QDBusMessage msg = QDBusMessage::createMethodCall(
@@ -39,7 +48,7 @@ SystemDManager::SystemDManager(const QString &serviceName, QObject *parent)
     connect(msgWatcher, &QDBusPendingCallWatcher::finished, this, &SystemDManager::checkServerStatus);
 
 
-    m_sessionDBusConnection.connect(
+    m_dBusConnection.connect(
                     QString(),
                     s_dbusPath+"/unit/"+m_serviceName+"_2eservice",
                     s_propertiesIface,
@@ -100,7 +109,7 @@ bool SystemDManager::installServiceFile(const QString currentPath)
         QFile::remove(servicePath());
     }
 
-    QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/");
+    QDir().mkpath(m_systemDDirPath);
 
     if(currentPath.isEmpty() || !QFile::exists(currentPath)) {
         return false;
@@ -140,19 +149,19 @@ void SystemDManager::restartService()
 void SystemDManager::startOnBoot(bool start)
 {
     if(start) {
-        if (!QDir(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/ubuntu-touch-session.target.wants").exists()) {
+        if (!QDir(m_systemDDirPath + m_systemDTarget + ".target.wants").exists()) {
             Logging::instance()->add("creating systemd directory");
-            QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/ubuntu-touch-session.target.wants");
+            QDir().mkpath(m_systemDDirPath + m_systemDTarget + ".target.wants");
         }
 
         // Create a link for systemd service to enable automatically
-        if(!QFile::link(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/" + m_serviceName + ".service",
-                        QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/ubuntu-touch-session.target.wants/" + m_serviceName + ".service")) {
+        if(!QFile::link(m_systemDDirPath + m_serviceName + ".service",
+                        m_systemDDirPath + m_systemDTarget + ".target.wants/" + m_serviceName + ".service")) {
             Logging::instance()->add("can't link servie");
         }
 
     } else {
-        QFile::remove(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/ubuntu-touch-session.target.wants/" + m_serviceName + ".service");
+        QFile::remove(m_systemDDirPath + m_systemDTarget + ".target.wants/" + m_serviceName + ".service");
     }
 
     m_systemdInterface.call("Reload");
@@ -160,7 +169,7 @@ void SystemDManager::startOnBoot(bool start)
 
 bool SystemDManager::isStartOnBoot() const
 {
-    return QFile::exists(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/ubuntu-touch-session.target.wants/" + m_serviceName + ".service");
+    return QFile::exists(m_systemDDirPath + m_systemDTarget + ".target.wants/" + m_serviceName + ".service");
 }
 
 void SystemDManager::onServiceDirChanged(const QString &path)
@@ -231,5 +240,5 @@ QByteArray SystemDManager::fileChecksum(const QString &fileName, QCryptographicH
 
 QString SystemDManager::servicePath() const
 {
-    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/systemd/user/" + m_serviceName + ".service";
+    return m_systemDDirPath + m_serviceName + ".service";
 }
