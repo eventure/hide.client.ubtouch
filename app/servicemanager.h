@@ -38,7 +38,7 @@ public:
 #ifdef SYSTEMD_WITH_ROOT
     Q_INVOKABLE void setRootPassword(const QString &newRootPassword);
 #endif
-    Q_INVOKABLE bool withRoot() const;
+    bool withRoot() const;
     bool cliAvailable() const;
 
     ServiceStatus currentStatus() const;

@@ -10,6 +10,12 @@ Page {
         title: qsTr("Setup service")
     }
 
+    Component.onCompleted: {
+        if(serviceManager.withRoot && !mainView.fullAccessGranted) {
+                authLoader.item.authenticate()
+        }
+    }
+
     Column {
         id: loginPageColumn
         width: parent.width - units.gu(4)

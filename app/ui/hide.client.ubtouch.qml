@@ -23,6 +23,22 @@ MainView {
         Component.onCompleted: initPage();
     }
 
+    Loader{
+        id: authLoader
+        Component.onCompleted: {
+            if(serviceManager.withRoot) {
+                authLoader.source = "authentication/AuthenticationHandler.qml"
+                console.log("Load Authentication Handler")
+            }
+        }
+    }
+
+    Connections{
+        target: authLoader.item
+        onAuthenticationSucceeded: fullAccessGranted = true
+    }
+
+
     ServerSelectionModel{
         id: serverSelectionModel
     }
