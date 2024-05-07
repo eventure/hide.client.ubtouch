@@ -4,6 +4,9 @@ framework: ubuntu-sdk-20.04
 dependencies_host:
 - cmake-extras
 - golang-1.21
+build_args: [
+    -DSYSTEMD_ON_ROOT=ON
+]
 skip_review: true
 ignore_review_errors: true
 install_bin:

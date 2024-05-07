@@ -9,6 +9,8 @@
 class SystemDManager : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString rootPassword READ rootPassword WRITE setRootPassword NOTIFY rootPasswordChanged)
+
 public:
     enum SystemDServiceStatus{
         NOT_INSTALLED,
@@ -30,9 +32,14 @@ public:
 
     SystemDServiceStatus currentStatus() {return m_currentStatus;}
 
+    QString rootPassword() const;
+    void setRootPassword(const QString &newRootPassword);
+
 signals:
     void serviceRunningChanged();
     void serviceStatusChanged();
+
+    void rootPasswordChanged();
 
 private slots:
     void onServiceDirChanged(const QString &path);
@@ -49,9 +56,12 @@ private:
     QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm = QCryptographicHash::Md5) const;
 
     QString m_serviceName;
+    const QString m_systemDDirPath;
+    const QString m_systemDTarget;
     QDBusInterface m_systemdInterface;
-    QDBusConnection m_sessionDBusConnection;
+    QDBusConnection m_dBusConnection;
 
     SystemDServiceStatus m_currentStatus;
+    QString m_rootPassword;
 };
 #endif // SYSTEMDMANAGER_H

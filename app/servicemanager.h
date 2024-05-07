@@ -12,6 +12,7 @@ class ServiceManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool cliAvailable READ cliAvailable)
+    Q_PROPERTY(bool withRoot READ withRoot CONSTANT)
     Q_PROPERTY(bool startOnBoot READ startOnBoot WRITE setStartOnBoot NOTIFY startOnBootChanged)
     Q_PROPERTY(ServiceStatus currentStatus READ currentStatus NOTIFY currentStatusChanged)
 
@@ -34,7 +35,10 @@ public:
     Q_INVOKABLE void installServies();
     Q_INVOKABLE void startServie();
     Q_INVOKABLE void stopServie();
-
+#ifdef SYSTEMD_WITH_ROOT
+    Q_INVOKABLE void setRootPassword(const QString &newRootPassword);
+#endif
+    bool withRoot() const;
     bool cliAvailable() const;
 
     ServiceStatus currentStatus() const;
