@@ -44,7 +44,7 @@ Rectangle{
     Component.onCompleted: {
         calculateStatusProp();
         var location = serverSelectionModel.get(cli.hostName)["displayName"]
-        if(location != "") {
+        if(location != undefined) {
             locationText.text = location
         }
     }

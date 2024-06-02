@@ -16,6 +16,10 @@ Page {
         }
     }
 
+    Connections{
+        target: serviceManager
+    }
+
     Column {
         id: loginPageColumn
         width: parent.width - units.gu(4)
@@ -32,10 +36,14 @@ Page {
         BigButton{
             width: parent.width
             height: units.gu(5)
-            color: serviceManager.currentStatus == ServiceManager.NOT_INSTALLED ? "#2AA9E0" : "#A9E02A"
-            text: serviceManager.currentStatus == ServiceManager.NOT_INSTALLED ? qsTr("Install service file") : qsTr("Service file installed")
+            color: serviceManager.currentStatus == ServiceManager.NOT_INSTALLED ? "#2AA9E0" : "#E02AA9"
+            text: serviceManager.currentStatus == ServiceManager.NOT_INSTALLED ? qsTr("Install service file") : qsTr("Remove hideme serivices")
 
-            onClicked: if(serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) { serviceManager.installServies() }
+            onClicked: if(serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) {
+                           serviceManager.installServices()
+                       } else {
+                           serviceManager.removeServices()
+                       }
         }
 
         BigButton{
@@ -62,15 +70,15 @@ Page {
         BigButton{
             width: parent.width
             height: units.gu(5)
-            enabled: serviceManager.currentStatus != ServiceManager.NOT_INSTALLED
+            visible: serviceManager.currentStatus != ServiceManager.NOT_INSTALLED
             color: (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? "#2AA9E0" : "#A9E02A"
             text:  (serviceManager.currentStatus == ServiceManager.NOT_STARTED || serviceManager.currentStatus == ServiceManager.NOT_INSTALLED) ? qsTr("Start service") : qsTr("Stop service")
 
             onClicked: if(serviceManager.currentStatus == ServiceManager.NOT_STARTED ) {
                            console.log("Do start!")
-                           serviceManager.startServie()
+                           serviceManager.startService()
                        } else {
-                           serviceManager.stopServie()
+                           serviceManager.stopService()
                        }
         }
     }

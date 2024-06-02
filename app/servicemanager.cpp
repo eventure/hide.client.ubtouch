@@ -30,9 +30,6 @@ ServiceManager::ServiceManager(QObject *parent)
 
     m_connector = new SocektConnector(m_settings->value("url", "127.0.0.1").toString()
                                       , m_settings->value("port", 5050).toInt() , this);
-    connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
-
-    m_connector->start();
 
     QFile cli(m_program);
     Logging::instance()->add(m_program);
@@ -79,18 +76,28 @@ void ServiceManager::socketCodeChangedHandler()
 
 void ServiceManager::onServiceStatusChanged()
 {
-    Logging::instance()->add("Serive status changed!!!");
+    Logging::instance()->add("Serivce status changed!!!");
+    SystemDManager::SystemDServiceStatus newDStatus = m_sysDmanager->currentStatus();
+    Logging::instance()->add("New systemd status id " + QString::number(newDStatus));
 
     ServiceManager::ServiceStatus newStatus = ServiceManager::UNKNOW;
-    if(m_sysDmanager->currentStatus() == SystemDManager::SystemDServiceStatus::NOT_INSTALLED) {
+    if(newDStatus == SystemDManager::SystemDServiceStatus::NOT_INSTALLED) {
         Logging::instance()->add("Service file not installed");
-        m_currentStatus = ServiceStatus::NOT_INSTALLED;
-    } else if(m_sysDmanager->currentStatus() == SystemDManager::SystemDServiceStatus::STARTED) {
+        newStatus = ServiceStatus::NOT_INSTALLED;
+    } else if(newDStatus == SystemDManager::SystemDServiceStatus::STARTED) {
         Logging::instance()->add("Service is started");
+        connect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
+        m_connector->start();
         newStatus = ServiceStatus::STARTED;
-    } else if(m_sysDmanager->currentStatus() == SystemDManager::SystemDServiceStatus::NOT_STARTED){
+    } else if(newDStatus == SystemDManager::SystemDServiceStatus::NOT_STARTED){
         Logging::instance()->add("Service not started");
+        disconnect(m_connector, &SocektConnector::codeChanged, this, &ServiceManager::socketCodeChangedHandler);
+        m_connector->stop();
         newStatus = ServiceManager::NOT_STARTED;
+    }
+
+    if(newStatus == ServiceManager::UNKNOW) {
+        Logging::instance()->add("Wrong service status");
     }
 
     if(newStatus != ServiceManager::UNKNOW && newStatus != m_currentStatus) {
@@ -99,8 +106,9 @@ void ServiceManager::onServiceStatusChanged()
     }
 }
 
-void ServiceManager::installServies()
+void ServiceManager::installServices()
 {
+    Logging::instance()->add("Install service");
     m_sysDmanager->installServiceFile(
             #ifdef WITH_CLICK
                 "/opt/click.ubuntu.com/hideme.eventure/current/hideme.service"
@@ -110,13 +118,21 @@ void ServiceManager::installServies()
                 );
 }
 
-void ServiceManager::startServie()
+void ServiceManager::removeServices()
+{
+    Logging::instance()->add("remove service");
+    stopService();
+    setStartOnBoot(false);
+    m_sysDmanager->removeServiceFile();
+}
+
+void ServiceManager::startService()
 {
     Logging::instance()->add("Start service");
     m_sysDmanager->startService();
 }
 
-void ServiceManager::stopServie()
+void ServiceManager::stopService()
 {
     Logging::instance()->add("Stop service");
     m_sysDmanager->stopService();

@@ -13,12 +13,14 @@ class SystemDManager : public QObject
 
 public:
     enum SystemDServiceStatus{
-        NOT_INSTALLED,
+        NOT_INSTALLED = 1,
         NOT_STARTED,
-        STARTED
+        STARTED,
+        UNKNOW = 256
     };
 
     SystemDManager(const QString &serviceName, QObject *parent = nullptr);
+    virtual ~SystemDManager();
 
     bool installServiceFile(const QString currentPath = "");
     bool removeServiceFile();
@@ -48,9 +50,11 @@ private slots:
 
 private:
     void calcServiceStatus();
-    bool serviceFileInstalled() const;
-    bool serviceFileIsActual(const QString actualFilePath = "") const;
-    bool serviceRunning();
+    void dbusConnect();
+    void dbusDisconnect();
+    bool isServiceFileInstalled() const;
+    bool isServiceFileIsActual(const QString actualFilePath = "") const;
+    bool isServiceRunning();
 
     QString servicePath() const;
     QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm = QCryptographicHash::Md5) const;
@@ -60,6 +64,7 @@ private:
     const QString m_systemDTarget;
     QDBusInterface m_systemdInterface;
     QDBusConnection m_dBusConnection;
+    QDBusPendingCallWatcher* m_msgWatcher;
 
     SystemDServiceStatus m_currentStatus;
     QString m_rootPassword;

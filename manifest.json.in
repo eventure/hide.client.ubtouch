@@ -1,7 +1,7 @@
 {
     "name": "@CLICK_NAME@",
     "title": "hideme",
-    "version": "0.5",
+    "version": "0.5.1",
     "description": "hide.me VPN Ubuntu Touch client",
     "architecture": "@CLICK_ARCH@",
     "framework": "ubuntu-sdk-20.04",
