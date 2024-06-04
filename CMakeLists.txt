@@ -36,7 +36,7 @@ if(CLICK_MODE)
     set(URLS_DIR ${DATA_DIR})
 
     add_compile_definitions(WITH_CLICK)
-    set(CLI_PATH /opt/click.ubuntu.com/${CLICK_NAME}/${PROJECT_VERSION}/lib/aarch64-linux-gnu/bin/hide.me)
+    set(CLI_PATH /opt/click.ubuntu.com/${CLICK_NAME}/current/lib/aarch64-linux-gnu/bin/hide.me)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_BINARY_DIR}/../sentry/${ARCH_TRIPLET}/install")
 
     configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)

@@ -18,23 +18,24 @@ class ServiceManager : public QObject
 
 public:
     enum ServiceStatus{
-        UNKNOW = -1,
-        NOT_INSTALLED,
+        NOT_INSTALLED = 1,
         NOT_STARTED,
         STARTED,
         CONNECTING,
         CONNECTED,
         DISCONNECTING,
-        DISCONNECTED
+        DISCONNECTED,
+        UNKNOW = 256,
     };
     Q_ENUMS(ServiceStatus)
 
     ServiceManager(QObject* parent = nullptr);
     virtual ~ServiceManager();
 
-    Q_INVOKABLE void installServies();
-    Q_INVOKABLE void startServie();
-    Q_INVOKABLE void stopServie();
+    Q_INVOKABLE void installServices();
+    Q_INVOKABLE void removeServices();
+    Q_INVOKABLE void startService();
+    Q_INVOKABLE void stopService();
 #ifdef SYSTEMD_WITH_ROOT
     Q_INVOKABLE void setRootPassword(const QString &newRootPassword);
 #endif
