@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(hideme VERSION 0.5 LANGUAGES CXX)
 include(FindGettext)
 if(NOT GETTEXT_FOUND)
@@ -7,6 +7,13 @@ endif(NOT GETTEXT_FOUND)
 
 # Standard install paths
 include(GNUInstallDirs)
+
+set(QT_VERSION_MAJOR "5" CACHE STRING "Qt major version")
+set_property(CACHE QT_VERSION_MAJOR PROPERTY STRINGS 5 6)
+
+if(NOT QT_VERSION_MAJOR MATCHES "^[56]$")
+    message(FATAL_ERROR "Only Qt5 and Qt6 are supported")
+endif()
 
 option(CLICK_MODE "Installs to a contained location" on)
 option(BUILD_CLI "Installs to a contained location" on)
@@ -66,7 +73,7 @@ add_custom_target(${DESKTOP_FILE} ALL
             -d ${CMAKE_SOURCE_DIR}/po
 )
 
-find_package(Qt5 COMPONENTS Core Gui Widgets Qml Quick DBus REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets Qml Quick DBus REQUIRED)
 find_package(SENTRY CONFIG REQUIRED)
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 configure_file(hideme.service.in ${CMAKE_CURRENT_BINARY_DIR}/hideme.service @ONLY)

@@ -14,7 +14,7 @@ set(SRC
 add_executable(test_sentry ${SRC})
 
 target_link_libraries(test_sentry
-    Qt5::Core
+    Qt${QT_VERSION_MAJOR}::Core
     -L$ENV{SENTRY_LIB_INSTALL_DIR}/lib -lsentry)
 
 

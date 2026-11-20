@@ -29,12 +29,12 @@ set(SRC
 add_executable(hideme ${SRC})
 
 target_link_libraries(hideme
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::Qml
-    Qt5::Quick
-    Qt5::Gui
-    Qt5::DBus
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Qml
+    Qt${QT_VERSION_MAJOR}::Quick
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::DBus
     -L$ENV{SENTRY_LIB_INSTALL_DIR}/lib -lsentry)
 
 install(TARGETS hideme RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
